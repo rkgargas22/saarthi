@@ -8,4 +8,5 @@ public class LetterOptions
     public string SanctionLetter { get; set; } = string.Empty;
     public string FuelLoanAgreement { get; set; } = string.Empty;
     public string ProvisionalLetter { get; set; } = string.Empty;
+    public string DocumentFolderPath { get; set; } = string.Empty;
 }

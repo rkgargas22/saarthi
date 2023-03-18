@@ -35,7 +35,7 @@ namespace Tmf.Saarthi.Api.Controllers
         [Route("UpdateFiDetails/{FleetID}")]
         [ProducesDefaultResponseType(typeof(FiDetailResponse))]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(FiDetailResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FiDetailResponse), StatusCodes.Status201Created)]
         public async Task<IActionResult> UpdateFiDetail([FromRoute] long FleetID, [FromBody] UpdateFiDetailRequest adminFleetDeviationRequest)
         {
             UpdateFiDetailResponse updateFiDetailResponse = await _creditManager.UpdateFiDetail(FleetID, adminFleetDeviationRequest);

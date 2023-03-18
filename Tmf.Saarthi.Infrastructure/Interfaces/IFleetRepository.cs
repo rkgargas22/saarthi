@@ -1,5 +1,4 @@
-﻿
-
+﻿using Tmf.Saarthi.Core.ResponseModels.Fleet;
 using Tmf.Saarthi.Infrastructure.Models.Request.Fleet;
 using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
 
@@ -25,9 +24,15 @@ public interface IFleetRepository
 
     Task<LetterMasterDataResponseModel> LetterMasterData(long FleetID);
 
-    Task<CommentResponseModel> UpdateComment(CommentRequestModel commentRequestModel);
+    Task<CommentResponseModel> AddComment(CommentRequestModel commentRequestModel);
 
-    Task<AdditionalInformationResponseModel> UpdateAdditionalInformation(AdditionalInformationRequestModel additionalInformationRequestModel);
+    Task<AdditionalInformationResponseModel> AddAdditionalInformation(AdditionalInformationRequestModel additionalInformationRequestModel);
 
     Task<AddressChangeResponseModel> AddressChange(AddressChangeRequestModel addressChangeRequest);
+
+    Task<string> GetVehicleType(string VehicleModel);
+
+    Task<List<GetDepartmentListResponseModel>> GetDepartmentLists(GetDepartmentListRequestModel getDepartmentListRequestModel);
+
+    Task<List<GetAdditionalInfoResponseModel>> GetAdditionalInfos(GetAdditionalInfoRequestModel getAdditionalInfoRequestModel);
 }

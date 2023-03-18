@@ -1,4 +1,7 @@
-﻿using Tmf.Saarthi.Core.ResponseModels.FleetVehicle;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Tmf.Saarthi.Core.ResponseModels.FleetVehicle;
+using Tmf.Saarthi.Infrastructure.Models.Request.FleetVehicle;
 
 namespace Tmf.Saarthi.Api.Controllers;
 
@@ -15,7 +18,7 @@ public class FleetVehicleController : ControllerBase
         _fleetVehicleManager = fleetVehicleManager;
         _addFleetVehicleValidator = addFleetVehicleValidator;
         _updateFleetVehicleRCValidator = updateFleetVehicleRCValidator;
-        _bulkAddFleetVehicleValidator= bulkAddFleetVehicleValidator;
+        _bulkAddFleetVehicleValidator = bulkAddFleetVehicleValidator;
     }
 
     [HttpGet("GetByFleetID/{FleetID}")]
@@ -29,7 +32,7 @@ public class FleetVehicleController : ControllerBase
         return Ok(getFleetVehicleResponses);
     }
 
-   
+
     [HttpGet("{VehicleID}")]
     [ProducesDefaultResponseType(typeof(GetFleetVehicleResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -57,26 +60,44 @@ public class FleetVehicleController : ControllerBase
         AddFleetVehicleResponse addFleetVehicleResponse = await _fleetVehicleManager.AddFleetVehicle(addFleetVehicleRequest);
         if (addFleetVehicleResponse.VehicleID == 0)
         {
-            return BadRequest(new ErrorResponse { Message = ValidationMessages.InsertFailed, Error = ValidationMessages.DuplicateData });
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.InsertFailed, Error = addFleetVehicleResponse.ErrorMessage });
         }
 
         return CreatedAtAction(nameof(Post), new { addFleetVehicleResponse.VehicleID }, addFleetVehicleResponse);
     }
 
     [HttpPost]
-    [Route("upload/{fleetid}")]
+    [Route("upload/{fleetId}")]
     [ProducesDefaultResponseType(typeof(BulkAddFleetVehicleResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(BulkAddFleetVehicleResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> Upload([FromRoute] int fleetId, [FromBody] BulkAddFleetVehicleRequest bulkAddFleetVehicleRequest)
-    {       
+    {
+        string vehicleRegex = "^[A-Z]{2}[0-9]{2}[A-Z]{1,3}[0-9]{3,4}$";
+        Regex re = new Regex(vehicleRegex);
         ValidationResult validationResult = await _bulkAddFleetVehicleValidator.ValidateAsync(bulkAddFleetVehicleRequest);
         if (!validationResult.IsValid)
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
         }
-
-        BulkAddFleetVehicleResponse bulkAddFleetVehicleResponseList = await _fleetVehicleManager.BulkAddFleetVehicle(fleetId,bulkAddFleetVehicleRequest);
+        foreach (string rcNo in bulkAddFleetVehicleRequest.RCNoList)
+        {
+            string res = rcNo.Substring(0, 2);
+            if (res.ToUpper() == "DL")
+            {
+                vehicleRegex = "^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{3,4}$";
+                re = new Regex(vehicleRegex);
+            }
+            if (!re.IsMatch(rcNo))
+            {
+                return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
+            }
+        }
+        if (bulkAddFleetVehicleRequest.RCNoList.Count != bulkAddFleetVehicleRequest.RCNoList.Distinct().Count())
+        {
+            return BadRequest(new ErrorResponse { Message = "Duplicate data found. Please check RC Number.", Error = validationResult.Errors.Select(m => m.ErrorMessage) });
+        }
+        BulkAddFleetVehicleResponse bulkAddFleetVehicleResponseList = await _fleetVehicleManager.BulkAddFleetVehicle(fleetId, bulkAddFleetVehicleRequest);
         if (bulkAddFleetVehicleResponseList != null && bulkAddFleetVehicleResponseList.Vehicles.Count == 0)
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.InsertFailed, Error = ValidationMessages.DuplicateData });
@@ -103,7 +124,7 @@ public class FleetVehicleController : ControllerBase
         if (updateFleetVehicleRCResponse.VehicleID == 0)
         {
             string errMessage = ValidationMessages.IdNotFound;
-            if (!string.IsNullOrEmpty(updateFleetVehicleRCResponse.Message)) 
+            if (!string.IsNullOrEmpty(updateFleetVehicleRCResponse.Message))
             {
                 errMessage = updateFleetVehicleRCResponse.Message;
             }
@@ -113,7 +134,7 @@ public class FleetVehicleController : ControllerBase
         return Ok(updateFleetVehicleRCResponse);
     }
 
-   
+
     [HttpDelete("{VehicleID}")]
     [ProducesDefaultResponseType(typeof(DeleteFleetVehicleResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -126,7 +147,7 @@ public class FleetVehicleController : ControllerBase
             return BadRequest(new ErrorResponse { Message = ValidationMessages.DeleteFailed, Error = ValidationMessages.IdNotFound });
         }
         return Ok(deleteFleetVehicleResponse);
-    }   
+    }
 
     [HttpPatch("DeactivateRC/{VehicleID}")]
     [ProducesDefaultResponseType(typeof(DeactivateFleetVehicleResponse))]

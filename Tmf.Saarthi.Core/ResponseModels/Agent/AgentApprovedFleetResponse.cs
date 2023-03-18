@@ -5,7 +5,10 @@ namespace Tmf.Saarthi.Core.ResponseModels.Agent;
 public class AgentApprovedFleetResponse
 {
     [JsonPropertyName("fleetId")]
-    public long FleetId { get; set; }
+    public long FleetId { get; set; } 
+    
+    [JsonPropertyName("VehicleID")]
+    public long VehicleID { get; set; }
 
     [JsonPropertyName("rCNo")]
     public string RcNo { get; set; } = string.Empty;

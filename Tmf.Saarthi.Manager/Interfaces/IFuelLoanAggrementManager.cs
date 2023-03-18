@@ -4,5 +4,5 @@ namespace Tmf.Saarthi.Manager.Interfaces;
 
 public interface IFuelLoanAggrementManager
 {
-    Task<FuelLoanAgreementResponse> GenerateFuelLoanAgreement(long FleetID);
+    Task<FuelLoanAgreementResponse> GenerateFuelLoanAgreement(long FleetId, long CreatedBy);
 }

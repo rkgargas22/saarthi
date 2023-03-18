@@ -7,7 +7,6 @@ using Tmf.Saarthi.Infrastructure.HttpService;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Email;
 using Tmf.Saarthi.Infrastructure.Models.Response.Email;
-using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
 using Tmf.Saarthi.Infrastructure.SqlService;
 
 namespace Tmf.Saarthi.Infrastructure.Services;

@@ -1,8 +1,10 @@
-﻿using Tmf.Saarthi.Core.ResponseModels.ProvisionalLette;
+﻿using Tmf.Saarthi.Core.RequestModels.Letter;
+using Tmf.Saarthi.Core.ResponseModels.ProvisionalLette;
 
 namespace Tmf.Saarthi.Manager.Interfaces;
 
 public interface IProvisionalLetterManager
 {
-    Task<ProvisionalLetteResponse> GenerateprovisionalLetter(long FleetID);
+    Task<ProvisionalLetterResponse> GenerateProvisionalLetter(long FleetId, long CreatedBy);
+    Task<DisagreeProvisionalResponse> DisagreeProvisionalLetter(DisagreeProvisionalResquest disagreeProvisionalResquest);
 }

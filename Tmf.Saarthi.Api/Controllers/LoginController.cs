@@ -1,5 +1,7 @@
-﻿using Tmf.Saarthi.Core.RequestModels.Login;
+﻿using System.Dynamic;
+using Tmf.Saarthi.Core.RequestModels.Login;
 using Tmf.Saarthi.Core.ResponseModels.Login;
+using Tmf.Saarthi.Core.ResponseModels.Security;
 
 
 namespace Tmf.Saarthi.Api.Controllers;
@@ -12,11 +14,13 @@ public class LoginController : ControllerBase
     private readonly ILogger _logger;
     private readonly ILoginManager _loginManager;
     private readonly IValidator<LoginRequest> _loginRequestValidator;
-    public LoginController(ILogger<LoginController> logger, ILoginManager loginManager, IValidator<LoginRequest> loginRequestValidator)
+    private readonly ITokenManager _tokenManager;
+    public LoginController(ILogger<LoginController> logger, ILoginManager loginManager, IValidator<LoginRequest> loginRequestValidator, ITokenManager tokenManager)
     {
         _logger = logger;
         _loginManager = loginManager;
         _loginRequestValidator = loginRequestValidator;
+        _tokenManager = tokenManager;
     }
 
     [HttpPost]
@@ -33,7 +37,26 @@ public class LoginController : ControllerBase
         }
         LoginResponse loginResponse = await _loginManager.LoginAsync(loginRequest);
 
-        return CreatedAtAction(nameof(Post), new { loginResponse.BpNo }, loginResponse);
+        if (loginResponse != null && loginResponse.customerResponse.BPNumber == 0)
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.ValidationError, Error = ValidationMessages.IdNotFound });
+        }
+        TokenClaims claimPram = new TokenClaims()
+        {
+            BPNumber = loginResponse.customerResponse.BPNumber.ToString(),
+            MobileNo = loginResponse.customerResponse.MobileNo,
+            EmailID = loginResponse.customerResponse.EmailID,
+            Role = "Customer"
+        };
+        var tokenToReturn = _tokenManager.AccesToken(claimPram);
+
+
+        dynamic User = new ExpandoObject();
+
+        User.loginResponse = loginResponse;
+        User.Token = tokenToReturn;
+
+        return CreatedAtAction(nameof(Post), new { loginResponse.customerResponse.BPNumber }, User);
 
     }
 
@@ -51,12 +74,30 @@ public class LoginController : ControllerBase
             return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = result.Errors.Select(m => m.ErrorMessage) });
         }
         EmployeeLoginResponse employeeLoginResponse = await _loginManager.EmployeeLoginAsync(loginRequest);
-        if(employeeLoginResponse != null && employeeLoginResponse.BPNumber == 0) 
+
+        if (employeeLoginResponse != null && employeeLoginResponse.BPNumber == 0)
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.ValidationError, Error = ValidationMessages.IdNotFound });
         }
-        
-        return CreatedAtAction(nameof(EmployeeLogin), new { employeeLoginResponse.BPNumber }, employeeLoginResponse);
+        TokenClaims claimPram = new TokenClaims()
+        {
+            BPNumber = employeeLoginResponse.BPNumber.ToString(),
+            MobileNo = employeeLoginResponse.MobileNo,
+            EmailID = employeeLoginResponse.EmailID,
+            Role = employeeLoginResponse.Role
+        };
+        var tokenToReturn = _tokenManager.AccesToken(claimPram);
+
+
+        dynamic User = new ExpandoObject();
+
+        User.employeeLoginResponse = employeeLoginResponse; 
+        User.Token= tokenToReturn;
+
+        return CreatedAtAction(nameof(EmployeeLogin), new { employeeLoginResponse.BPNumber }, User);
 
     }
+
+   
+
 }

@@ -6,7 +6,7 @@ using Tmf.Saarthi.Infrastructure.HttpService;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Admin;
 using Tmf.Saarthi.Infrastructure.Models.Response.Admin;
-using Tmf.Saarthi.Infrastructure.Models.Response.Agent;
+using Tmf.Saarthi.Infrastructure.Models.Response.Customer;
 using Tmf.Saarthi.Infrastructure.SqlService;
 
 namespace Tmf.Saarthi.Infrastructure.Services
@@ -16,12 +16,13 @@ namespace Tmf.Saarthi.Infrastructure.Services
         private readonly ISqlUtility _sqlUtility;
         private readonly IHttpService _httpService;
         private readonly ConnectionStringsOptions _connectionStringsOptions;
+        
 
         public AdminRepository(ISqlUtility sqlUtility, IOptions<ConnectionStringsOptions> connectionStringsOptions, IHttpService httpService, IOptions<InstaVeritaOptions> instaVeritaOptions)
         {
             _sqlUtility = sqlUtility;
             _httpService = httpService;
-            _connectionStringsOptions = connectionStringsOptions.Value;
+            _connectionStringsOptions = connectionStringsOptions.Value;            
         }
 
         public async Task<List<AdminDashbaordResponseModel>> GetAdminDashboard()
@@ -61,6 +62,7 @@ namespace Tmf.Saarthi.Infrastructure.Services
                 {
                     AdminFleetResponseModel adminFleetResponseModel = new AdminFleetResponseModel();
                     adminFleetResponseModel.VehicleId = (Int64)dt.Rows[i]["VehicleId"];
+                    adminFleetResponseModel.FleetID = (Int64)dt.Rows[i]["FleetID"];
                     adminFleetResponseModel.RegistrationNo = dt.Rows[i]["REGISTRATIONNO"] == DBNull.Value ? "" : (string)dt.Rows[i]["REGISTRATIONNO"];
                     adminFleetResponseModel.OwnerName = dt.Rows[i]["OWNERNAME"] == DBNull.Value ? "" : (string)dt.Rows[i]["OWNERNAME"];
                     adminFleetResponseModel.Year = dt.Rows[i]["YEAR"] == DBNull.Value ? 0 : (int)dt.Rows[i]["YEAR"];
@@ -102,29 +104,6 @@ namespace Tmf.Saarthi.Infrastructure.Services
             return adminFleetDeviationResponseModel;
         }
 
-        public async Task<AdminFleetDeviationResponseModel> UpdateAdminFleetDeviation(AdminFleetDeviationRequestModel adminFleetDeviationRequestModel)
-        {
-            List<SqlParameter> parameters = new List<SqlParameter>()
-        {
-            new SqlParameter("FleetId", adminFleetDeviationRequestModel.FleetID),
-            new SqlParameter("IsIRR", adminFleetDeviationRequestModel.IsIRR),
-            new SqlParameter("NewIRR", adminFleetDeviationRequestModel.NewIRR),
-            new SqlParameter("IsAIR", adminFleetDeviationRequestModel.IsAIR),
-            new SqlParameter("NewAIR", adminFleetDeviationRequestModel.NewAIR),
-            new SqlParameter("IsProcessing", adminFleetDeviationRequestModel.IsProcessing),
-            new SqlParameter("NewProcessing", adminFleetDeviationRequestModel.NewProcessing)
-        };
-
-            DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_updateAdminFleetDeviation", parameters);
-
-            AdminFleetDeviationResponseModel adminFleetDeviationResponseModel = new AdminFleetDeviationResponseModel();
-            if (dt.Rows.Count > 0)
-            {
-                adminFleetDeviationResponseModel.FleetId = Convert.ToInt64(dt.Rows[0]["FleetID"]);
-            }
-
-            return adminFleetDeviationResponseModel;
-        }
 
         public async Task<List<AdminCaseOverViewResponseModel>> GetAdminCaseOverViewData(long fleetId)
         {
@@ -205,6 +184,31 @@ namespace Tmf.Saarthi.Infrastructure.Services
             }
 
             return customerDataResponseModelList;
+        }
+
+
+        public async Task<AdminFleetDeviationResponseModel> UpdateAdminFleetDeviation(AdminFleetDeviationRequestModel adminFleetDeviationRequestModel)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("FleetId", adminFleetDeviationRequestModel.FleetID),
+            new SqlParameter("IsIRR", adminFleetDeviationRequestModel.IsIRR),
+            new SqlParameter("NewIRR", adminFleetDeviationRequestModel.NewIRR),
+            new SqlParameter("IsAIR", adminFleetDeviationRequestModel.IsAIR),
+            new SqlParameter("NewAIR", adminFleetDeviationRequestModel.NewAIR),
+            new SqlParameter("IsProcessing", adminFleetDeviationRequestModel.IsProcessing),
+            new SqlParameter("NewProcessing", adminFleetDeviationRequestModel.NewProcessing)
+        };
+
+            DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_updateAdminFleetDeviation", parameters);
+
+            AdminFleetDeviationResponseModel adminFleetDeviationResponseModel = new AdminFleetDeviationResponseModel();
+            if (dt.Rows.Count > 0)
+            {
+                adminFleetDeviationResponseModel.FleetId = Convert.ToInt64(dt.Rows[0]["FleetID"]);
+            }
+
+            return adminFleetDeviationResponseModel;
         }
     }
 }

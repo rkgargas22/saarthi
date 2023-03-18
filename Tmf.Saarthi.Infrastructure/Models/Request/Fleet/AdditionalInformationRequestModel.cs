@@ -10,8 +10,10 @@ public class AdditionalInformationRequestModel
     public string AdditionalInformation { get; set; } = string.Empty;
     [JsonPropertyName("departmentType")]
     public string DepartmentType { get; set; } = string.Empty;
-    [JsonPropertyName("updatedBy")]
-    public long UpdatedBy { get; set; }
-    [JsonPropertyName("updatedDate")]
-    public DateTime UpdatedDate { get; set; }
+    [JsonPropertyName("createdBy")]
+    public long CreatedBy { get; set; }
+    [JsonPropertyName("createdUserType")]
+    public string CreatedUserType { get; set; } = string.Empty;
+    [JsonPropertyName("createdDate")]
+    public DateTime CreatedDate { get; set; }
 }

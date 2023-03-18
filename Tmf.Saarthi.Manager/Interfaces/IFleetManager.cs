@@ -25,9 +25,13 @@ public interface IFleetManager
 
     Task<LetterMasterDataResponse> LetterMasterData(long FleetID);
 
-    Task<CommentResponse> UpdateComment(long FleetID, CommentRequest commentRequest);
+    Task<CommentResponse> AddComment(CommentRequest commentRequest);
 
-    Task<AdditionalInformationResponse> UpdateAdditionalInformation(long FleetID, AdditionalInformationRequest additionalInformationRequest);
+    Task<AdditionalInformationResponse> AddAdditionalInformation(AdditionalInformationRequest additionalInformationRequest);
 
     Task<AddressChangeResponse> AddressChange(long FleetID, AddressChangeRequest addressChangeRequest);
+
+    Task<List<GetDepartmentListResponse>> GetDepartmentList(GetDepartmentListRequest getDepartmentListRequest);
+
+    Task<List<GetAdditionalInfoResponse>> GetAdditionalInfo(GetAdditionalInfoRequest getAdditionalInfoRequest);
 }

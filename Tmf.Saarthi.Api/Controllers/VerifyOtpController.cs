@@ -1,4 +1,6 @@
-﻿using Tmf.Saarthi.Core.ResponseModels.Otp;
+﻿using System.Dynamic;
+using Tmf.Saarthi.Core.ResponseModels.Otp;
+using Tmf.Saarthi.Core.ResponseModels.Security;
 
 namespace Tmf.Saarthi.Api.Controllers;
 
@@ -10,12 +12,16 @@ public class VerifyOtpController : ControllerBase
     private readonly IOtpManager _otpManager;
     private readonly ICustomerManager _customerManager;
     private readonly IValidator<VerifyOtpRequest> _verifyOtpValidator;
-    public VerifyOtpController(ILogger<VerifyOtpController> logger, IOtpManager otpManager, ICustomerManager customerManager, IValidator<VerifyOtpRequest> verifyOtpValidator)
+    
+    private readonly ITokenManager _tokenManager;
+    public VerifyOtpController(ILogger<VerifyOtpController> logger, IOtpManager otpManager, ICustomerManager customerManager, IValidator<VerifyOtpRequest> verifyOtpValidator
+        ,   ITokenManager tokenManager)
     {
         _logger = logger;
         _otpManager = otpManager;
         _verifyOtpValidator = verifyOtpValidator;
         _customerManager = customerManager;
+        _tokenManager = tokenManager;
     }
 
 
@@ -32,11 +38,30 @@ public class VerifyOtpController : ControllerBase
             return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = result.Errors.Select(m => m.ErrorMessage) });
         }
 
+        var validOTP = await _otpManager.GetOTPDetailByReqId(verifyOtpRequest.RequestId);
+
+        if (!validOTP) 
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = ValidationMessages.OTPSessionExpired });
+        }
+
         VerifyOtpResponse verifyOtpResponse = await _otpManager.VerifyOtpAsync(verifyOtpRequest);
-
-       
         _logger.LogInformation("verify otp end");
-
-        return CreatedAtAction(nameof(Post), new { verifyOtpResponse.customerResponse.BPNumber }, verifyOtpResponse);
+        TokenClaims claimPram = new TokenClaims()
+        {
+            BPNumber = verifyOtpResponse.customerResponse.BPNumber.ToString(),
+            MobileNo = verifyOtpResponse.customerResponse.MobileNo,
+            EmailID = verifyOtpResponse.customerResponse.EmailID,
+            Role = "Customer"
+        };
+        var tokenToReturn = _tokenManager.AccesToken(claimPram);
+        dynamic User = new ExpandoObject();
+        User.verifyOtpResponse = verifyOtpResponse;
+        User.Token = tokenToReturn;
+        return CreatedAtAction(nameof(Post), new { verifyOtpResponse.customerResponse.BPNumber }, User);
+         
     }
+
+    
+
 }

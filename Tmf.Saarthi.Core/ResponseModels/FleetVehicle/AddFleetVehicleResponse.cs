@@ -10,4 +10,7 @@ public class AddFleetVehicleResponse
     public long FleetID { get; set; }
     [JsonPropertyName("rCNo")]
     public string RCNo { get; set; } = string.Empty;
+    [JsonPropertyName("errorMessage")]
+    [JsonIgnore]
+    public string ErrorMessage { get; set; } = string.Empty;
 }

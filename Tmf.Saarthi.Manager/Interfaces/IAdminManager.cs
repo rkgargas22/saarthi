@@ -10,7 +10,6 @@ namespace Tmf.Saarthi.Manager.Interfaces
         Task<List<AdminDashbaordResponse>> GetAdminDashbaord();
         Task<List<AdminFleetResponse>> GetAdminFleet(long FleetId);
         Task<AdminFleetDeviationResponse> GetAdminFleetDeviation(long FleetId);
-        Task<List<CustomerDataResponse>> GetCustomerData(long fleetId);
         Task<AdminFleetDeviationUpdateResponse> UpdateAdminFleetDeviation(long fleetID, AdminFleetDeviationRequest adminFleetDeviationRequest);
     }
 

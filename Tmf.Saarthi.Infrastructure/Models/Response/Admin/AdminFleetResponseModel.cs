@@ -11,6 +11,8 @@ namespace Tmf.Saarthi.Infrastructure.Models.Response.Admin
     {
         [JsonPropertyName("VehicleId")]
         public long VehicleId { get; set; }
+        [JsonPropertyName("FleetID")]
+        public long FleetID { get; set; }
 
         [JsonPropertyName("REGISTRATIONNO")]
         public string RegistrationNo { get; set; }

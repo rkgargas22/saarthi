@@ -4,21 +4,9 @@ namespace Tmf.Saarthi.Infrastructure.Models.Request.ProvisionalLetter;
 
 public class ProvisionalLetterRequestModel
 {
-    [JsonPropertyName("Name")]
-    public string Name { get; set; } = String.Empty;
+    [JsonPropertyName("mappingProperties")]
+    public Dictionary<string, string> MappingProperties { get; set; } = new Dictionary<string, string>();
 
-    [JsonPropertyName("applicationNumber")]
-    public long ApplicationNumber { get; set; }
-
-    [JsonPropertyName("loanAmount")]
-    public Decimal? LoanAmount { get; set; }
-
-    [JsonPropertyName("loanTenure")]
-    public Decimal LoanTenure { get; set; }
-
-    [JsonPropertyName("rateOfInterest")]
-    public Decimal? RateOfInterest { get; set; }
-
-    [JsonPropertyName("processingFee")]
-    public Decimal? ProcessingFee { get; set; }
+    [JsonPropertyName("htmlbase64String")]
+    public string Htmlbase64String { get; set; } = string.Empty;
 }

@@ -62,4 +62,33 @@ public class EmailManager : IEmailManager
 
         return sendEmailResponse;
     }
+
+    public async Task<SendAgentEmailResponse> SendAgentEmail(SendAgentEmailRequest sendAgentEmailRequest)
+    {
+        SendAgentEmailResponse sendAgentEmailResponse = new SendAgentEmailResponse();
+
+        CustomerResponse customerResponse = await _customerManager.GetCustomerByMobileNo(sendAgentEmailRequest.MobileNo);
+        if (customerResponse != null && customerResponse.BPNumber != 0)
+        {
+            TemplateDataRequest templateDataRequest = new TemplateDataRequest();
+            templateDataRequest.TemplateType = sendAgentEmailRequest.Template;
+            templateDataRequest.Module = sendAgentEmailRequest.Module;
+            templateDataRequest.SubModule = sendAgentEmailRequest.SubModule;
+            TemplateDataResponse templateDataResponse = await _emailRepository.GetTemplateData(templateDataRequest);
+
+            if (templateDataResponse != null && templateDataResponse.TemplateId != 0)
+            {
+                templateDataResponse.Body = templateDataResponse.Body.Replace("{{url}}", templateDataResponse.Url);
+                SendEmailRequestModel sendEmailRequestModel = new SendEmailRequestModel();
+                sendEmailRequestModel.ToEmail = customerResponse.EmailID;
+                sendEmailRequestModel.Subject = templateDataResponse.Subject;
+                sendEmailRequestModel.Body = templateDataResponse.Body;
+                SendEmailResponseModel sendEmailResponseModel = await _emailRepository.SendEmail(sendEmailRequestModel);
+
+                sendAgentEmailResponse.Message = sendEmailResponseModel.Message;
+            }
+        }
+
+        return sendAgentEmailResponse;
+    }
 }

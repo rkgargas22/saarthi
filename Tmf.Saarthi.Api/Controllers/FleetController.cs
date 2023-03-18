@@ -38,7 +38,7 @@ public class FleetController : ControllerBase
             getFleetResponse = await _fleetManager.Add(BPNumber);
             if(getFleetResponse.FleetID == 0)
             {
-                return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = "DB Error" });
+                return BadRequest(new ErrorResponse { Message = "Invalid BPNumber", Error = "DB Error" });
             }
             return Ok(getFleetResponse);
         }
@@ -114,12 +114,12 @@ public class FleetController : ControllerBase
         return Ok(eAgreementApprovalResponse);
     }
 
-    [HttpPatch]
-    [Route("AddComment/{FleetID}")]
+    [HttpPost]
+    [Route("AddComment")]
     [ProducesDefaultResponseType(typeof(CommentResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(CommentResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateComment([FromRoute] long FleetID, [FromBody] CommentRequest addCommentRequest)
+    [ProducesResponseType(typeof(CommentResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> AddComment([FromBody] CommentRequest addCommentRequest)
     {
         ValidationResult validationResult = await _commentValidator.ValidateAsync(addCommentRequest);
         if (!validationResult.IsValid)
@@ -127,17 +127,21 @@ public class FleetController : ControllerBase
             return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
         }
 
-        CommentResponse commentResponse = await _fleetManager.UpdateComment(FleetID, addCommentRequest);
+        CommentResponse commentResponse = await _fleetManager.AddComment(addCommentRequest);
+        if (commentResponse != null && commentResponse.CommentId == 0)
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.InsertFailed, Error = commentResponse.Message });
+        }
 
-        return Ok(commentResponse);
+        return CreatedAtAction(nameof(AddComment), null, commentResponse);
     }
 
-    [HttpPatch]
-    [Route("AddAdditionalInfo/{FleetID}")]
+    [HttpPost]
+    [Route("AddAdditionalInfo")]
     [ProducesDefaultResponseType(typeof(AdditionalInformationResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(AdditionalInformationResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateAdditionalInformation([FromRoute] long FleetID, [FromBody] AdditionalInformationRequest addAdditionalInformationRequest)
+    [ProducesResponseType(typeof(AdditionalInformationResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> AddAdditionalInfo([FromBody] AdditionalInformationRequest addAdditionalInformationRequest)
     {
         ValidationResult validationResult = await _additionalInformationValidator.ValidateAsync(addAdditionalInformationRequest);
         if (!validationResult.IsValid)
@@ -145,9 +149,13 @@ public class FleetController : ControllerBase
             return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
         }
 
-        AdditionalInformationResponse additionalInformationResponse = await _fleetManager.UpdateAdditionalInformation(FleetID, addAdditionalInformationRequest);
+        AdditionalInformationResponse additionalInformationResponse = await _fleetManager.AddAdditionalInformation(addAdditionalInformationRequest);
+        if(additionalInformationResponse != null && additionalInformationResponse.AdditionalInfoId == 0) 
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.InsertFailed, Error = additionalInformationResponse.Message });
+        }
 
-        return Ok(additionalInformationResponse);
+        return CreatedAtAction(nameof(AddAdditionalInfo), null,additionalInformationResponse);
     }
 
 
@@ -167,6 +175,30 @@ public class FleetController : ControllerBase
         AddressChangeResponse addressChangeResponse = await _fleetManager.AddressChange(FleetID, addressChangeRequest);
 
         return Ok(addressChangeResponse);
+    }
+
+    [HttpGet]
+    [Route("GetDepartmentType")]
+    [ProducesDefaultResponseType(typeof(List<GetDepartmentListResponse>))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(List<GetDepartmentListResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDepartmentType([FromQuery] GetDepartmentListRequest getDepartmentListRequest)
+    {
+        List<GetDepartmentListResponse> getDepartmentListResponses = await _fleetManager.GetDepartmentList(getDepartmentListRequest);
+
+        return Ok(getDepartmentListResponses);
+    }
+
+    [HttpGet]
+    [Route("GetAdditionalInfoData")]
+    [ProducesDefaultResponseType(typeof(List<GetAdditionalInfoResponse>))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(List<GetAdditionalInfoResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAdditionalInfoData([FromQuery] GetAdditionalInfoRequest getAdditionalInfoData)
+    {
+        List<GetAdditionalInfoResponse> getAdditionalInfoResponses = await _fleetManager.GetAdditionalInfo(getAdditionalInfoData);
+
+        return Ok(getAdditionalInfoResponses);
     }
 
 }

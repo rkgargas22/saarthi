@@ -2,5 +2,5 @@
 
 public class DocumentResponse
 {
-    public long FleetId { get; set; }
+    public long DocumentId { get; set; }
 }

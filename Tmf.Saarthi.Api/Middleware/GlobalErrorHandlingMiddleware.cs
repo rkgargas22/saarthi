@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Tmf.Saarthi.Core.Exceptions;
 
 namespace Tmf.Saarthi.Api.Middleware;
 

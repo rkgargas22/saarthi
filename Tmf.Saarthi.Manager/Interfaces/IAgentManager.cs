@@ -26,4 +26,8 @@ public interface IAgentManager
     Task<AssignFleetResponse> AssignFleet(AssignFleetRequest assignFleetRequest);
 
     Task<AgentCustomerResponse> GetAgentCustomerDataByFleetID(long FleetID);
+
+    Task<List<AgentListDataResponse>> GetAgentLists(AgentListDataRequest agentListDataRequest);
+
+    Task<SendOtpToCustomerResponse> SendOtpToCustomer(SendOtpToCustomerRequest sendOtpToCustomerRequest);
 }

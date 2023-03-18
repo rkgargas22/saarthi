@@ -1,14 +1,18 @@
 ﻿using Microsoft.Extensions.Options;
+using Tmf.Saarthi.Core.Enums;
 using Tmf.Saarthi.Core.Options;
 using Tmf.Saarthi.Core.RequestModels.DMS;
+using Tmf.Saarthi.Core.RequestModels.Document;
 using Tmf.Saarthi.Core.RequestModels.Fleet;
 using Tmf.Saarthi.Core.RequestModels.FleetVehicle;
 using Tmf.Saarthi.Core.ResponseModels.Customer;
 using Tmf.Saarthi.Core.ResponseModels.DMS;
+using Tmf.Saarthi.Core.ResponseModels.Document;
 using Tmf.Saarthi.Core.ResponseModels.Fleet;
 using Tmf.Saarthi.Core.ResponseModels.FleetVehicle;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Fleet;
+using Tmf.Saarthi.Infrastructure.Models.Response.DocumentTypeMstr;
 using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
 using Tmf.Saarthi.Manager.Interfaces;
 
@@ -20,14 +24,26 @@ public class FleetManager : IFleetManager
     private readonly IFleetVehicleManager _fleetVehicleManager;
     private readonly ICustomerManager _customerManager;
     private readonly IDMSManager _dMSManager;
+    private readonly IUploadManager _uploadManager;
     private readonly FleetConfigurationOptions _fleetConfigurationOptions;
-    public FleetManager(IFleetRepository fleetRepository, IFleetVehicleRepository fleetVehicleRepository, IFleetVehicleManager fleetVehicleManager, ICustomerManager customerManager, IOptions<FleetConfigurationOptions> fleetConfigurationOptions, IDMSManager dMSManager)
+    private readonly IDocumentTypeMstrManager _documentTypeMstrManager;
+
+    public FleetManager(IFleetRepository fleetRepository, 
+                        IFleetVehicleRepository fleetVehicleRepository, 
+                        IFleetVehicleManager fleetVehicleManager, 
+                        ICustomerManager customerManager, 
+                        IOptions<FleetConfigurationOptions> fleetConfigurationOptions, 
+                        IDMSManager dMSManager, 
+                        IUploadManager uploadManager,
+                        IDocumentTypeMstrManager documentTypeMstrManager)
     {
         _fleetRepository = fleetRepository;
         _fleetVehicleManager = fleetVehicleManager;
         _customerManager = customerManager;
         _fleetConfigurationOptions = fleetConfigurationOptions.Value;
         _dMSManager = dMSManager;
+        _uploadManager = uploadManager;
+        _documentTypeMstrManager = documentTypeMstrManager;
     }
 
     public async Task<GetFleetResponse> Add(long BPNumber)
@@ -58,7 +74,7 @@ public class FleetManager : IFleetManager
         addFleetRequestModel.CreatedDate = DateTime.Now;
         FleetResponseModel fleetResponseModel = await _fleetRepository.AddFleet(addFleetRequestModel);
 
-        if(fleetResponseModel != null)
+        if (fleetResponseModel != null)
         {
             getFleetResponse.FleetID = fleetResponseModel.FleetID;
             getFleetResponse.BPNumber = addFleetRequestModel.BPNumber;
@@ -89,7 +105,7 @@ public class FleetManager : IFleetManager
         FleetResponseModel getFleetResponseModel = await _fleetRepository.GetFleet(getFleetRequestModel);
 
         GetFleetResponse getFleetResponse = new GetFleetResponse();
-        if (getFleetResponseModel != null)
+        if (getFleetResponseModel != null && getFleetResponseModel.FleetID > 0)
         {
             getFleetResponse.FleetID = getFleetResponseModel.FleetID;
             getFleetResponse.BPNumber = getFleetResponseModel.BPNumber;
@@ -136,7 +152,7 @@ public class FleetManager : IFleetManager
             IEnumerable<GetFleetVehicleByFleetIDResponse> getFleetVehicleByFleetIDResponses = await _fleetVehicleManager.GetFleetVehicleByFleetID(getFleetResponseModel.FleetID);
             List<GetFleetVehicleResponse> getFleetVehicleResponses = new List<GetFleetVehicleResponse>();
 
-            foreach(GetFleetVehicleByFleetIDResponse getFleetVehicleByFleetIDResponse in getFleetVehicleByFleetIDResponses)
+            foreach (GetFleetVehicleByFleetIDResponse getFleetVehicleByFleetIDResponse in getFleetVehicleByFleetIDResponses)
             {
                 GetFleetVehicleResponse getFleetVehicleResponse = new GetFleetVehicleResponse();
                 getFleetVehicleResponse.FleetID = getFleetVehicleByFleetIDResponse.FleetID;
@@ -154,7 +170,7 @@ public class FleetManager : IFleetManager
     public async Task<VerifyFleetResponse> Verify(long fleetId)
     {
         VerifyFleetResponse verifyFleetResponse = await GetFleetByFleetId(fleetId);
-        if(verifyFleetResponse != null && verifyFleetResponse.FleetID != 0) 
+        if (verifyFleetResponse != null && verifyFleetResponse.FleetID != 0)
         {
             CustomerResponse customerResponse = await _customerManager.GetCustomerByBPNumber(verifyFleetResponse.BPNumber);
             bool isUpdate = false;
@@ -172,10 +188,10 @@ public class FleetManager : IFleetManager
                         {
                             await InsertInstaVeritaLogs(vehicle.VehicleID, instaVeritaResponse);
                         }
-                        string FullName = customerResponse.FirstName + (string.IsNullOrEmpty(customerResponse.MiddleName) ? "" : " " + customerResponse.MiddleName) + (string.IsNullOrEmpty(customerResponse.LastName) ? "" : " " + customerResponse.LastName);
-
+                        string customerFullName = customerResponse.FirstName + (string.IsNullOrEmpty(customerResponse.MiddleName) ? "" : " " + customerResponse.MiddleName) + (string.IsNullOrEmpty(customerResponse.LastName) ? "" : " " + customerResponse.LastName);
+                        customerFullName = customerFullName.Replace(".", "").Replace(" ", "");
                         vehicle.IsApproved = false;
-                        if (FullName.ToLower() == instaVeritaResponse.OwnersName.ToLower())
+                        if (customerFullName.ToLower() == instaVeritaResponse?.OwnersName.Replace(".", "").Replace(" ", "").ToLower())
                         {
                             vehicle.IsApproved = true;
                         }
@@ -183,15 +199,25 @@ public class FleetManager : IFleetManager
                         {
                             vehicle.Reject_Reason = "Owner Name of vehicle " + vehicle.RCNo + " did not match.";
                         }
-                        if(vehicle.IsApproved && instaVeritaResponse.RegistrationDate != null)
+                        if (vehicle.IsApproved && instaVeritaResponse.RegistrationDate != null)
                         {
                             DateTime zeroTime = new DateTime(1, 1, 1);
                             var diff = (DateTime.Now - instaVeritaResponse.RegistrationDate).Value;
                             int years = (zeroTime + diff).Year - 1;
-                            if(years > verifyFleetResponse.VehicleAgeCriteria) 
+                            if (years > verifyFleetResponse.VehicleAgeCriteria)
                             {
                                 vehicle.IsApproved = false;
                                 vehicle.Reject_Reason = "Vehicle Age of vehicle " + vehicle.RCNo + " exceeds loan criteria.";
+                            }
+                        }
+                        if (vehicle.IsApproved && !string.IsNullOrEmpty(instaVeritaResponse.VehicleModel))
+                        {
+                            string VehicleType = await _fleetRepository.GetVehicleType(instaVeritaResponse.VehicleModel);
+
+                            if (string.IsNullOrEmpty(VehicleType) || VehicleType.ToLower() != "mhcv")
+                            {
+                                vehicle.IsApproved = false;
+                                vehicle.Reject_Reason = "Vehicle Type of " + vehicle.RCNo + " is not MHCV";
                             }
                         }
 
@@ -223,7 +249,7 @@ public class FleetManager : IFleetManager
 
         return verifyFleetResponse;
     }
-    
+
     public async Task<VerifyFleetResponse> GetFleetByFleetId(long fleetId)
     {
         VerifyFleetResponseModel fleetResponseModel = await _fleetRepository.GetFleetDetailByFleetId(fleetId);
@@ -255,7 +281,7 @@ public class FleetManager : IFleetManager
             verifyFleetResponse.Comment = fleetResponseModel.Comment;
             verifyFleetResponse.AdditionalInformation = fleetResponseModel.AdditionalInformation;
             verifyFleetResponse.DepartmentType = fleetResponseModel.DepartmentType;
-            verifyFleetResponse.AgreementDate  = fleetResponseModel.AgreementDate ;
+            verifyFleetResponse.AgreementDate = fleetResponseModel.AgreementDate;
             verifyFleetResponse.RequestedIRR = fleetResponseModel.RequestedIRR;
             verifyFleetResponse.RequestedProcessingFees = fleetResponseModel.RequestedProcessingFees;
             verifyFleetResponse.NewIRR = fleetResponseModel.NewIRR;
@@ -272,11 +298,15 @@ public class FleetManager : IFleetManager
             verifyFleetResponse.CpcFcId = fleetResponseModel.CpcFcId;
             verifyFleetResponse.CpcTlFcId = fleetResponseModel.CpcTlFcId;
             verifyFleetResponse.IsAddressChanged = fleetResponseModel.IsAddressChanged;
+            verifyFleetResponse.AccountNumber = fleetResponseModel.AccountNumber;
+            verifyFleetResponse.IFSCCode = fleetResponseModel.IFSCCode;
+            verifyFleetResponse.ApplicantName = fleetResponseModel.ApplicantName;
             verifyFleetResponse.FleetVehicles = new List<VerifyFleetVehicleResponse>();
 
-            if(fleetResponseModel.FleetVehicles.Count > 0)
+            if (fleetResponseModel.FleetVehicles.Count > 0)
             {
-                foreach (var fleetVehicle in fleetResponseModel.FleetVehicles) {
+                foreach (var fleetVehicle in fleetResponseModel.FleetVehicles)
+                {
                     VerifyFleetVehicleResponse verifyFleetVehicleResponse = new VerifyFleetVehicleResponse();
                     verifyFleetVehicleResponse.VehicleID = fleetVehicle.VehicleID;
                     verifyFleetVehicleResponse.FleetID = fleetVehicle.FleetID;
@@ -339,7 +369,7 @@ public class FleetManager : IFleetManager
 
         InstaVeritaLogResponse instaVeritaLogResponse = await _fleetVehicleManager.InsertInstaVeritaDetails(instaVeritaLogRequest);
 
-        if(instaVeritaLogResponse.Log_Id != 0 && instaVeritaResponse.BlacklistedDetails.Count > 0)
+        if (instaVeritaLogResponse.Log_Id != 0 && instaVeritaResponse.BlacklistedDetails.Count > 0)
         {
             BlackListedDetailsRequest blackListedDetailsRequest = new BlackListedDetailsRequest();
             blackListedDetailsRequest.InstaLogId = instaVeritaLogResponse.Log_Id;
@@ -366,7 +396,7 @@ public class FleetManager : IFleetManager
         ProvisionApprovalResponseModel provisionApprovalResponseModel = await _fleetRepository.ProvisionApproval(provisionApprovalRequestModel);
 
         ProvisionApprovalResponse provisionApprovalResponse = new ProvisionApprovalResponse();
-        if(provisionApprovalResponseModel.FleetID == 0)
+        if (provisionApprovalResponseModel.FleetID == 0)
         {
             provisionApprovalResponse.Message = "Update Failed";
         }
@@ -462,7 +492,7 @@ public class FleetManager : IFleetManager
 
         LetterMasterDataResponse letterMasterDataResponse = new LetterMasterDataResponse();
 
-        if(letterMasterDataResponseModel != null)
+        if (letterMasterDataResponseModel != null)
         {
             letterMasterDataResponse.FanNo = letterMasterDataResponseModel.FanNo;
             letterMasterDataResponse.BorrowerAuthorisedPersonName = letterMasterDataResponseModel.BorrowerName;
@@ -499,48 +529,89 @@ public class FleetManager : IFleetManager
         return letterMasterDataResponse;
     }
 
-    public async Task<CommentResponse> UpdateComment(long FleetID, CommentRequest commentRequest)
+    public async Task<CommentResponse> AddComment(CommentRequest commentRequest)
     {
         CommentResponse commentResponse = new CommentResponse();
 
         CommentRequestModel commentRequestModel = new CommentRequestModel();
-        commentRequestModel.FleetID = FleetID;
+        commentRequestModel.FleetID = commentRequest.FleetID;
         commentRequestModel.Comment = commentRequest.Comment;
-        commentRequestModel.UpdatedBy = 41;
-        commentRequestModel.UpdatedDate = DateTime.Now;
+        commentRequestModel.CreatedBy = 41;
+        commentRequestModel.CreatedUserType = "AGENT";
+        commentRequestModel.CreatedDate = DateTime.Now;
 
-        CommentResponseModel commentResponseModel = await _fleetRepository.UpdateComment(commentRequestModel);
-        if (commentResponseModel.FleetID == 0)
+        CommentResponseModel commentResponseModel = await _fleetRepository.AddComment(commentRequestModel);
+
+        commentResponse.CommentId = commentResponseModel.CommentId;
+        commentResponse.Message = commentResponseModel.ErrorMessage;
+
+        DocumentTypeMstrResponseModel documentTypeMstrResponseModel = await _documentTypeMstrManager.GetDocumentTypeMstrByDocumentCode(DocumentCodeFlag.OTHER);
+
+        if (commentResponse.CommentId != 0)
         {
-            commentResponse.Message = "Update Failed";
-        }
-        else
-        {
-            commentResponse.Message = "Updated Successfully";
+            int i = 0;
+            foreach (var doc in commentRequest.Documents)
+            {
+                UploadDocumentsRequest uploadDocumentsRequest = new UploadDocumentsRequest()
+                {
+                    EntityCode = EntityCode.COMMENT.ToString(),
+                    EntityId = commentResponse.CommentId,
+                    FleetId = commentRequest.FleetID,
+                    Extension = doc.Extension,
+                    StageId = (int)commentResponseModel.StageId,
+                    DocTypeId = documentTypeMstrResponseModel.DocTypeId,
+                    DocumentName = "Comment_" + commentResponseModel.CommentId + "_" + i,
+                    DocumentData = Convert.FromBase64String(doc.Data)
+                };
+
+                UploadDocumentsResponse uploadDocumentsResponse = await _uploadManager.UploadDocuments(uploadDocumentsRequest, 1);
+
+                i++;
+            }
         }
 
         return commentResponse;
     }
 
-    public async Task<AdditionalInformationResponse> UpdateAdditionalInformation(long FleetID, AdditionalInformationRequest additionalInformationRequest)
+    public async Task<AdditionalInformationResponse> AddAdditionalInformation(AdditionalInformationRequest additionalInformationRequest)
     {
         AdditionalInformationResponse additionalInformationResponse = new AdditionalInformationResponse();
 
         AdditionalInformationRequestModel additionalInformationRequestModel = new AdditionalInformationRequestModel();
-        additionalInformationRequestModel.FleetID = FleetID;
+        additionalInformationRequestModel.FleetID = additionalInformationRequest.FleetID;
         additionalInformationRequestModel.DepartmentType = additionalInformationRequest.DepartmentType;
         additionalInformationRequestModel.AdditionalInformation = additionalInformationRequest.AdditionalInformation;
-        additionalInformationRequestModel.UpdatedBy = 41;
-        additionalInformationRequestModel.UpdatedDate = DateTime.Now;
+        additionalInformationRequestModel.CreatedBy = 41;
+        additionalInformationRequestModel.CreatedUserType = "AGENT";
+        additionalInformationRequestModel.CreatedDate = DateTime.Now;
 
-        AdditionalInformationResponseModel additionalInformationResponseModel = await _fleetRepository.UpdateAdditionalInformation(additionalInformationRequestModel);
-        if (additionalInformationResponseModel.FleetID == 0)
+        AdditionalInformationResponseModel additionalInformationResponseModel = await _fleetRepository.AddAdditionalInformation(additionalInformationRequestModel);
+
+        additionalInformationResponse.AdditionalInfoId = additionalInformationResponseModel.AdditionalInfoId;
+        additionalInformationResponse.Message = additionalInformationResponseModel.ErrorMessage;
+
+        DocumentTypeMstrResponseModel documentTypeMstrResponseModel = await _documentTypeMstrManager.GetDocumentTypeMstrByDocumentCode(DocumentCodeFlag.OTHER);
+
+        if (additionalInformationResponse.AdditionalInfoId != 0)
         {
-            additionalInformationResponse.Message = "Update Failed";
-        }
-        else
-        {
-            additionalInformationResponse.Message = "Updated Successfully";
+            int i = 0;
+            foreach(var doc in additionalInformationRequest.Documents)
+            {
+                UploadDocumentsRequest uploadDocumentsRequest = new UploadDocumentsRequest() {
+                    EntityCode = EntityCode.ADDINFO.ToString(),
+                    EntityId = additionalInformationResponse.AdditionalInfoId,
+                    FleetId = additionalInformationRequest.FleetID,
+                    Extension = doc.Extension,
+                    StageId = (int)additionalInformationResponseModel.StageId,
+                    DocTypeId = documentTypeMstrResponseModel.DocTypeId,
+                    DocumentName = "AdditionalInfo_" + additionalInformationResponse.AdditionalInfoId + "_" + i,
+                    DocumentData = Convert.FromBase64String(doc.Data)
+                };
+
+                UploadDocumentsResponse uploadDocumentsResponse = await _uploadManager.UploadDocuments(uploadDocumentsRequest, 1);
+
+                i++;
+            }
         }
 
         return additionalInformationResponse;
@@ -569,11 +640,11 @@ public class FleetManager : IFleetManager
             if (verifyFleetResponse != null && string.IsNullOrEmpty(verifyFleetResponse.FanNo))
             {
                 GenerateFanNoRequest generateFanNoRequest = new GenerateFanNoRequest();
-                generateFanNoRequest.BranchCode = "50233";
+                generateFanNoRequest.BranchCode = verifyFleetResponse.IFSCCode;
                 generateFanNoRequest.ProcessType = "TMFD";
                 generateFanNoRequest.SchemeName = addressChangeRequest.IsAddressChange ? "RCUFL" : "NRCUFL";
                 generateFanNoRequest.LoanType = "autoCV";
-                generateFanNoRequest.ApplicantName = "testing";
+                generateFanNoRequest.ApplicantName = verifyFleetResponse.ApplicantName;
                 generateFanNoRequest.BdmName = "";
                 generateFanNoRequest.DsaName = "";
                 generateFanNoRequest.DealerName = "DIRECT";
@@ -590,5 +661,56 @@ public class FleetManager : IFleetManager
         }
 
         return addressChangeResponse;
+    }
+
+    public async Task<List<GetDepartmentListResponse>> GetDepartmentList(GetDepartmentListRequest getDepartmentListRequest)
+    {
+        List<GetDepartmentListResponse> getDepartmentListResponses = new List<GetDepartmentListResponse>();
+
+        GetDepartmentListRequestModel getDepartmentListRequestModel = new GetDepartmentListRequestModel()
+        {
+            FleetId = getDepartmentListRequest.FleetId,
+            Role = getDepartmentListRequest.Role
+        };
+
+        List<GetDepartmentListResponseModel> getDepartmentListResponseModels = await _fleetRepository.GetDepartmentLists(getDepartmentListRequestModel);
+
+        foreach(var dept in getDepartmentListResponseModels)
+        {
+            GetDepartmentListResponse getDepartmentListResponse = new GetDepartmentListResponse();
+            getDepartmentListResponse.DepartmentCode = dept.DepartmentCode;
+            getDepartmentListResponse.DepartmentName = dept.DepartmentName;
+
+            getDepartmentListResponses.Add(getDepartmentListResponse);
+        }
+
+        return getDepartmentListResponses;
+    }
+
+    public async Task<List<GetAdditionalInfoResponse>> GetAdditionalInfo(GetAdditionalInfoRequest getAdditionalInfoRequest)
+    {
+        List<GetAdditionalInfoResponse> getAdditionalInfoResponses = new List<GetAdditionalInfoResponse>();
+
+        GetAdditionalInfoRequestModel getAdditionalInfoRequestModel = new GetAdditionalInfoRequestModel();
+        getAdditionalInfoRequestModel.FleetId = getAdditionalInfoRequest.FleetId;
+        getAdditionalInfoRequestModel.DepartmentCode = getAdditionalInfoRequest.DepartmentCode;
+
+        List<GetAdditionalInfoResponseModel> getAdditionalInfoResponseModels = await _fleetRepository.GetAdditionalInfos(getAdditionalInfoRequestModel);
+
+        foreach(var addInfo in getAdditionalInfoResponseModels)
+        {
+            GetAdditionalInfoResponseModel getAdditionalInfoResponseModel = new GetAdditionalInfoResponseModel();
+            getAdditionalInfoResponseModel.AdditionalInfoId = addInfo.AdditionalInfoId;
+            getAdditionalInfoResponseModel.Comment = addInfo.Comment;
+            getAdditionalInfoResponseModel.RoleName = addInfo.RoleName;
+            getAdditionalInfoResponseModel.DepartmentCode = addInfo.DepartmentCode;
+            getAdditionalInfoResponseModel.StageCode = addInfo.StageCode;
+            getAdditionalInfoResponseModel.FleetID = addInfo.FleetID;
+            getAdditionalInfoResponseModel.AssignedTo = addInfo.AssignedTo;
+
+            getAdditionalInfoResponseModels.Add(getAdditionalInfoResponseModel);
+        }
+
+        return getAdditionalInfoResponses;
     }
 }

@@ -4,6 +4,8 @@ namespace Tmf.Saarthi.Core.ResponseModels.Ocr;
 
 public class AddressDetailsResponse
 {
+    [JsonPropertyName("BPNo")]
+    public long BPNo { get; set; } = 0;
     [JsonPropertyName("address")]
     public string Address { get; set; } = string.Empty;
     [JsonPropertyName("streetAddress")]

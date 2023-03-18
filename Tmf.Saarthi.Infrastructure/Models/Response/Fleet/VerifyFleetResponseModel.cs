@@ -101,6 +101,13 @@ public class VerifyFleetResponseModel
     public DateTime CreatedDate { get; set; }
     [JsonPropertyName("updatedDate")]
     public DateTime? UpdatedDate { get; set; }
+    [JsonPropertyName("AccountNumber")]
+    public string AccountNumber { get; set; }
+    [JsonPropertyName("IFSCCode")]
+    public string IFSCCode { get; set; }
+
+    [JsonPropertyName("ApplicantName")]
+    public string ApplicantName { get; set; }
     [JsonPropertyName("fleetVehicles")]
     public List<VerifyFleetVehicleResponseModel> FleetVehicles { get; set; }
 }

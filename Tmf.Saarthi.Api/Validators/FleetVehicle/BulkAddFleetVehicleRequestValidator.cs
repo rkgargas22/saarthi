@@ -4,6 +4,7 @@ public class BulkAddFleetVehicleRequestValidator : AbstractValidator<BulkAddFlee
 {
     public BulkAddFleetVehicleRequestValidator()
     {
+        RuleFor(x => x.RCNoList).Must(x => x.Count() <= 20).WithMessage("Vehicle count should not exceed 20 vehicles");
         RuleForEach(x => x.RCNoList).NotNull().WithMessage("RcNo {CollectionIndex} is required.");
     }
 }

@@ -24,5 +24,7 @@ public class EmployeeMasterResponseModel
     public string DefaultRole { get; set; } = string.Empty;
     [JsonPropertyName("isActive")]
     public bool IsActive { get; set; }
+    [JsonPropertyName("roleId")]
+    public long RoleId { get; set; }
 
 }

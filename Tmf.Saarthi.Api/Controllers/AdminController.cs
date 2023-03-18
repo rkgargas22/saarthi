@@ -71,19 +71,14 @@ namespace Tmf.Saarthi.Api.Controllers
         [ProducesResponseType(typeof(AdminFleetDeviationResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> ApproveAdminFleetDeviation([FromBody] ApproveAdminFleetDeviationRequest approveAdminFleetDeviationRequest)
         {
-            ApproveAdminFleetDeviationResponse approveAdminFleetDeviationResponse = await _adminManager.ApproveAdminFleetDeviation( approveAdminFleetDeviationRequest);
+            ApproveAdminFleetDeviationResponse approveAdminFleetDeviationResponse = await _adminManager.ApproveAdminFleetDeviation(approveAdminFleetDeviationRequest);
 
             return Ok(approveAdminFleetDeviationResponse);
         }
 
 
-        [HttpGet("CustomerData/{FleetId}")]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(List<CustomerDataResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetCustomerData(long FleetId)
-        {
-            List<CustomerDataResponse> adminFleetResponse = await _adminManager.GetCustomerData(FleetId);
-            return Ok(adminFleetResponse);
-        }
+       
+
+       
     }
 }

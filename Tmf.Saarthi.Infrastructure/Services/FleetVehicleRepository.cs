@@ -65,6 +65,7 @@ public class FleetVehicleRepository : IFleetVehicleRepository
             fleetVehicleResponseModel.VehicleID = Convert.ToInt64(dt.Rows[0]["VehicleID"]);
             fleetVehicleResponseModel.FleetID = addFleetVehicleRequestModel.FleetID;
             fleetVehicleResponseModel.RCNo = addFleetVehicleRequestModel.RCNo;
+            fleetVehicleResponseModel.ErrorMessage = dt.Rows[0]["ErrorMessage"] != DBNull.Value ? Convert.ToString(dt.Rows[0]["ErrorMessage"]) : string.Empty;
         }
         return fleetVehicleResponseModel;
     }

@@ -4,9 +4,10 @@ namespace Tmf.Saarthi.Infrastructure.Models.Request.CustomerConsent;
 
 public class CustomerConsentRequestModel
 {
-    [JsonPropertyName("borrower")]
-    public string Borrower { get; set; } = string.Empty;
-    [JsonPropertyName("coBorrower")]
-    public string CoBorrower { get; set; } = string.Empty;
+    [JsonPropertyName("mappingProperties")]
+    public Dictionary<string, string> MappingProperties { get; set; } = new Dictionary<string, string>();
+
+    [JsonPropertyName("htmlbase64String")]
+    public string Htmlbase64String { get; set; } = string.Empty;
 }
 

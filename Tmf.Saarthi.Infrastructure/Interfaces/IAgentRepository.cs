@@ -26,4 +26,6 @@ public interface IAgentRepository
     Task<AssignFleetResponseModel> AssignFleet(AssignFleetRequestModel assignFleetRequestModel);
 
     Task<AgentCustomerResponseModel> GetAgentCustomerDataByFleetId(long fleetId);
+
+    Task<List<AgentListDataResponseModel>> GetAgentLists(AgentListDataRequestModel agentListDataRequestModel);
 }

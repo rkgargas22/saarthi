@@ -6,6 +6,8 @@ public class AgentRejectedFleetResponseModel
 {
     [JsonPropertyName("fleetId")]
     public long FleetId { get; set; }
+    [JsonPropertyName("VehicleID")]
+    public long VehicleID { get; set; }
 
     [JsonPropertyName("rCNo")]
     public string RcNo { get; set; } = string.Empty;

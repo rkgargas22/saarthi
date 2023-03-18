@@ -76,6 +76,8 @@ public class ValidationMessages
 
     public const string Documenttype = "Enter Valid Document Type.";
     public const string DocumentUpload = "Upload Valid Document.";
+    public const string StageType = "Enter Valid Stage Type.";
+    public const string ExtensionType = "Enter Valid Extention.";
 
     #endregion
 
@@ -103,4 +105,23 @@ public class ValidationMessages
 
     public const string AgentId = "Enter Valid Agent Id";
     public const string Role = "Enter Valid Role";
+
+    public const string Status = "Enter Valid Status";
+    public const string IsNach = "Enter Valid IsNach";
+    public const string TimeSlot = "Enter Valid TimeSlot";
+
+    public const string EmandateId = "Enter Valid Emandate Id";
+    public const string EmandateDate = "Enter Valid Emandate Date";
+    public const string UtilityNo = "Enter Valid Utility No";
+    public const string CorporateName = "Enter Valid Corporate Name";
+    public const string UMRN = "Enter Valid UMRN";
+
+    public const string UserType = "Enter valid UserType.";
+
+    public const string Url = "Enter valid Url.";
+    public const string Template = "Enter valid Template.";
+
+    public const string OTPSessionExpired = "Otp Session Expired";
+
+    public const string SomeErrorOccured = "Some Error Occurred";
 }

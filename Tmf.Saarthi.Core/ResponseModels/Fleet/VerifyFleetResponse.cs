@@ -86,6 +86,14 @@ public class VerifyFleetResponse
     public long? CpcTlFcId { get; set; }
     [JsonPropertyName("isAddressChanged")]
     public bool? IsAddressChanged { get; set; }
+
+    [JsonPropertyName("AccountNumber")]
+    public string AccountNumber { get; set; }
+    [JsonPropertyName("IFSCCode")]
+    public string IFSCCode { get; set; }
+    [JsonPropertyName("ApplicantName")]
+    public string ApplicantName { get; set; }
+
     [JsonPropertyName("fleetVehicles")]
     public List<VerifyFleetVehicleResponse> FleetVehicles { get; set; }
 }

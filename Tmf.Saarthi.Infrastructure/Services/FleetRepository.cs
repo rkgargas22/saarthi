@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Data;
 using Tmf.Saarthi.Core.Options;
+using Tmf.Saarthi.Core.ResponseModels.Fleet;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Fleet;
 using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
@@ -188,6 +189,9 @@ public class FleetRepository : IFleetRepository
                 verifyFleetResponseModel.UpdatedBy = !string.IsNullOrEmpty(dt.Rows[0]["UpdatedBy"].ToString()) ? Convert.ToInt64(dt.Rows[0]["UpdatedBy"]) : null;
                 verifyFleetResponseModel.CreatedDate = Convert.ToDateTime(dt.Rows[0]["CreatedDate"]);
                 verifyFleetResponseModel.UpdatedDate = !string.IsNullOrEmpty(dt.Rows[0]["UpdatedDate"].ToString()) ? Convert.ToDateTime(dt.Rows[0]["UpdatedDate"]) : null;
+                verifyFleetResponseModel.AccountNumber = dt.Rows[0]["AccountNumber"] != DBNull.Value ? (string)dt.Rows[0]["AccountNumber"] : null;
+                verifyFleetResponseModel.IFSCCode = dt.Rows[0]["IFSCCode"] != DBNull.Value ? (string)dt.Rows[0]["IFSCCode"] : null;
+                verifyFleetResponseModel.ApplicantName = dt.Rows[0]["ApplicantName"] != DBNull.Value ? (string)dt.Rows[0]["ApplicantName"] : null;
                 verifyFleetResponseModel.FleetVehicles = new List<VerifyFleetVehicleResponseModel>();
             }
 
@@ -371,44 +375,50 @@ public class FleetRepository : IFleetRepository
         return letterMasterDataResponseModel;
     }
 
-    public async Task<CommentResponseModel> UpdateComment(CommentRequestModel commentRequestModel)
+    public async Task<CommentResponseModel> AddComment(CommentRequestModel commentRequestModel)
     {
         List<SqlParameter> parameters = new List<SqlParameter>()
         {
             new SqlParameter("FleetID", commentRequestModel.FleetID),
             new SqlParameter("Comment", commentRequestModel.Comment),
-            new SqlParameter("UpdatedBy", commentRequestModel.UpdatedBy),
-            new SqlParameter("UpdatedDate", commentRequestModel.UpdatedDate)
+            new SqlParameter("CreatedBy", commentRequestModel.CreatedBy),
+            new SqlParameter("CreatedUserType", commentRequestModel.CreatedUserType),
+            new SqlParameter("CreatedDate", commentRequestModel.CreatedDate)
         };
 
-        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_updateFleetComment", parameters);
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "uspAddFleetComment", parameters);
 
         CommentResponseModel commentResponseModel = new CommentResponseModel();
         if (dt.Rows.Count > 0)
         {
-            commentResponseModel.FleetID = Convert.ToInt64(dt.Rows[0]["FleetID"]);
+            commentResponseModel.CommentId = Convert.ToInt64(dt.Rows[0]["CmtId"]);
+            commentResponseModel.ErrorMessage = Convert.ToString(dt.Rows[0]["ErrorMessage"]);
+            commentResponseModel.StageId = Convert.ToInt64(dt.Rows[0]["StageId"]);
         }
 
         return commentResponseModel;
     }
 
-    public async Task<AdditionalInformationResponseModel> UpdateAdditionalInformation(AdditionalInformationRequestModel additionalInformationRequestModel)
+    public async Task<AdditionalInformationResponseModel> AddAdditionalInformation(AdditionalInformationRequestModel additionalInformationRequestModel)
     {
         List<SqlParameter> parameters = new List<SqlParameter>()
         {
             new SqlParameter("FleetID", additionalInformationRequestModel.FleetID),
             new SqlParameter("AdditionalInformation", additionalInformationRequestModel.AdditionalInformation),
             new SqlParameter("DepartmentType", additionalInformationRequestModel.DepartmentType),
-            new SqlParameter("UpdatedBy", additionalInformationRequestModel.UpdatedBy),
-            new SqlParameter("UpdatedDate", additionalInformationRequestModel.UpdatedDate)
+            new SqlParameter("CreatedBy", additionalInformationRequestModel.CreatedBy),
+            new SqlParameter("CreatedUserType", additionalInformationRequestModel.CreatedUserType),
+            new SqlParameter("CreatedDate", additionalInformationRequestModel.CreatedDate)
         };
 
-        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_updateFleetAdditionalInformation", parameters);
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "uspAddFleetAdditionalInformation", parameters);
 
         AdditionalInformationResponseModel additionalInformationResponseModel = new AdditionalInformationResponseModel();
         if (dt.Rows.Count > 0)
         {
-            additionalInformationResponseModel.FleetID = Convert.ToInt64(dt.Rows[0]["FleetID"]);
+            additionalInformationResponseModel.AdditionalInfoId = Convert.ToInt64(dt.Rows[0]["AdditionalInfoId"]);
+            additionalInformationResponseModel.ErrorMessage = Convert.ToString(dt.Rows[0]["ErrorMessage"]);
+            additionalInformationResponseModel.StageId = Convert.ToInt64(dt.Rows[0]["StageId"]);
         }
 
         return additionalInformationResponseModel;
@@ -433,5 +443,80 @@ public class FleetRepository : IFleetRepository
         }
 
         return addressChangeResponseModel;
+    }
+
+    public async Task<string> GetVehicleType(string VehicleModel)
+    {
+        string VehicleType = string.Empty;
+        List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("VehicleModel", VehicleModel)
+        };
+
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_getVehicleTypeByModel", parameters);
+
+        if (dt.Rows.Count > 0)
+        {
+            VehicleType = Convert.ToString(dt.Rows[0]["VehicleType"]);
+        }
+
+        return VehicleType;
+    }
+
+    public async Task<List<GetDepartmentListResponseModel>> GetDepartmentLists(GetDepartmentListRequestModel getDepartmentListRequestModel)
+    {
+        List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("FleetID", getDepartmentListRequestModel.FleetId),
+            new SqlParameter("Role", getDepartmentListRequestModel.Role)
+        };
+
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "uspGetDepartmentType", parameters);
+
+        List<GetDepartmentListResponseModel> getDepartmentListResponseModels = new List<GetDepartmentListResponseModel>();
+        if (dt.Rows.Count > 0)
+        {
+            for(int i = 0; i < dt.Rows.Count; i++)
+            {
+                GetDepartmentListResponseModel getDepartmentListResponseModel = new GetDepartmentListResponseModel();
+                getDepartmentListResponseModel.DepartmentCode = (string)dt.Rows[i]["DepartmentCode"];
+                getDepartmentListResponseModel.DepartmentName = (string)dt.Rows[i]["DepartmentName"];
+
+                getDepartmentListResponseModels.Add(getDepartmentListResponseModel);
+            }
+        }
+
+        return getDepartmentListResponseModels;
+    }
+
+    public async Task<List<GetAdditionalInfoResponseModel>> GetAdditionalInfos(GetAdditionalInfoRequestModel getAdditionalInfoRequestModel)
+    {
+        List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("FleetID", getAdditionalInfoRequestModel.FleetId),
+            new SqlParameter("Department", getAdditionalInfoRequestModel.DepartmentCode)
+        };
+
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "uspGetAddtionalInformationData", parameters);
+
+        List<GetAdditionalInfoResponseModel> getAdditionalInfoResponseModels = new List<GetAdditionalInfoResponseModel>();
+        if (dt.Rows.Count > 0)
+        {
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                GetAdditionalInfoResponseModel getAdditionalInfoResponseModel = new GetAdditionalInfoResponseModel();
+                getAdditionalInfoResponseModel.AdditionalInfoId = (long)dt.Rows[i]["AdditionalInfoId"];
+                getAdditionalInfoResponseModel.Comment = (string)dt.Rows[i]["Comment"];
+                getAdditionalInfoResponseModel.DepartmentCode = (string)dt.Rows[i]["DepartmentCode"];
+                getAdditionalInfoResponseModel.RoleName = (string)dt.Rows[i]["RoleName"];
+                getAdditionalInfoResponseModel.AssignedTo = (string)dt.Rows[i]["AssignedTo"];
+                getAdditionalInfoResponseModel.FleetID = (long)dt.Rows[i]["FleetID"];
+                getAdditionalInfoResponseModel.StageCode = (string)dt.Rows[i]["StageCode"];
+
+                getAdditionalInfoResponseModels.Add(getAdditionalInfoResponseModel);
+            }
+        }
+
+        return getAdditionalInfoResponseModels;
     }
 }

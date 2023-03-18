@@ -1,5 +1,4 @@
-﻿using Tmf.Saarthi.Core.Constants;
-using Tmf.Saarthi.Core.RequestModels.Login;
+﻿using Tmf.Saarthi.Core.RequestModels.Login;
 using Tmf.Saarthi.Core.ResponseModels.Login;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Login;
@@ -23,10 +22,19 @@ public class LoginManager : ILoginManager
         loginRequestModel.Username = loginRequest.Username!;
         loginRequestModel.Password = loginRequest.Password!;
         LoginResponseModel loginResponseModel = await _loginRepository.LoginAsync(loginRequestModel);
-        loginResponse.BpNo = loginResponseModel.BpNo;
-        loginResponse.MobileNo = loginResponseModel.MobileNo;
-        loginResponse.Email = loginResponseModel.Email;
-        loginResponse.UserId = loginResponseModel.UserName;
+
+        loginResponse.customerResponse.BPNumber = loginResponseModel.BPNumber;
+        loginResponse.customerResponse.FirstName = loginResponseModel.FirstName;
+        loginResponse.customerResponse.MiddleName = loginResponseModel.MiddleName;
+        loginResponse.customerResponse.LastName = loginResponseModel.LastName;
+        loginResponse.customerResponse.Gender = loginResponseModel.Gender;
+        loginResponse.customerResponse.BPType = loginResponseModel.BPType;
+        loginResponse.customerResponse.MobileNo = loginResponseModel.MobileNo;
+        loginResponse.customerResponse.EmailID = loginResponseModel.EmailID;
+        loginResponse.customerResponse.Title = loginResponseModel.Title;
+        loginResponse.customerResponse.Status = loginResponseModel.Status;
+        loginResponse.customerResponse.PanNo = loginResponseModel.PanNo;
+        loginResponse.customerResponse.CustomerType = loginResponseModel.CustomerType;
 
         return loginResponse;
     }
@@ -49,6 +57,7 @@ public class LoginManager : ILoginManager
             employeeLoginResponse.MobileNo = employeeMasterResponseModel.MobileNo;
             employeeLoginResponse.EmailID = employeeMasterResponseModel.EmailID;
             employeeLoginResponse.Role = employeeMasterResponseModel.DefaultRole;
+            employeeLoginResponse.RoleId = employeeMasterResponseModel.RoleId;
         }
 
 

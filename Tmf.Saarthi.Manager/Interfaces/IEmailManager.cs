@@ -6,4 +6,6 @@ namespace Tmf.Saarthi.Manager.Interfaces;
 public interface IEmailManager
 {
     Task<SendEmailResponse> SendEmail(SendEmailRequest sendEmailRequest);
+
+    Task<SendAgentEmailResponse> SendAgentEmail(SendAgentEmailRequest sendAgentEmailRequest);
 }

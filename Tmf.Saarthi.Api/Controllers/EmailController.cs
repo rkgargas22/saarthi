@@ -9,10 +9,12 @@ public class EmailController : ControllerBase
 {
     private readonly IEmailManager _emailManager;
     private readonly IValidator<SendEmailRequest> _sendEmailValidator;
-    public EmailController(IEmailManager emailManager, IValidator<SendEmailRequest> sendEmailValidator)
+    private readonly IValidator<SendAgentEmailRequest> _sendAgentEmailValidator;
+    public EmailController(IEmailManager emailManager, IValidator<SendEmailRequest> sendEmailValidator, IValidator<SendAgentEmailRequest> sendAgentEmailValidator)
     {
         _emailManager = emailManager;
         _sendEmailValidator = sendEmailValidator;
+        _sendAgentEmailValidator = sendAgentEmailValidator;
     }
 
     [HttpPost]
@@ -29,5 +31,21 @@ public class EmailController : ControllerBase
         SendEmailResponse sendEmailResponse = await _emailManager.SendEmail(sendEmailRequest);
 
         return CreatedAtAction(nameof(SendEmail), null, sendEmailResponse);
+    }
+
+    [HttpPost("SendAgentEmail")]
+    [ProducesDefaultResponseType(typeof(SendAgentEmailResponse))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(SendAgentEmailResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> SendAgentEmail([FromBody] SendAgentEmailRequest sendAgentEmailRequest)
+    {
+        ValidationResult validationResult = await _sendAgentEmailValidator.ValidateAsync(sendAgentEmailRequest);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
+        }
+        SendAgentEmailResponse sendAgentEmailResponse = await _emailManager.SendAgentEmail(sendAgentEmailRequest);
+
+        return CreatedAtAction(nameof(SendAgentEmail), null, sendAgentEmailResponse);
     }
 }

@@ -14,4 +14,6 @@ public interface IOcrRepository
     Task<VoterIdExtractResponseModel> VoterIdExtract(VoterIdExtractRequestModel voterIdExtractRequestModel);
 
     Task<DocumentMaskingResponseModel> DocumentMasking(DocumentMaskingRequestModel documentMaskingRequestModel);
+    Task<OCRUploadDocumentResponseModel> UploadOcrDocuments(OCRUploadDocumentRequestModel oCRUploadDocumentRequestModel);
+    Task<OCRUploadAddressResponseModel> UploadOcrAddress(OCRUploadAddressRequestModel oCRUploadAddressRequestModel);
 }

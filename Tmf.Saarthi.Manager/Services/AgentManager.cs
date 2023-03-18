@@ -1,7 +1,10 @@
 ﻿using System.Text.RegularExpressions;
-using System;
 using Tmf.Saarthi.Core.RequestModels.Agent;
+using Tmf.Saarthi.Core.RequestModels.Email;
+using Tmf.Saarthi.Core.RequestModels.Otp;
 using Tmf.Saarthi.Core.ResponseModels.Agent;
+using Tmf.Saarthi.Core.ResponseModels.Email;
+using Tmf.Saarthi.Core.ResponseModels.Otp;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Agent;
 using Tmf.Saarthi.Infrastructure.Models.Response.Agent;
@@ -12,9 +15,14 @@ namespace Tmf.Saarthi.Manager.Services;
 public class AgentManager : IAgentManager
 {
     private readonly IAgentRepository _agentRepository;
-    public AgentManager(IAgentRepository agentRepository)
+    private readonly IOtpManager _otpManager;
+    private readonly IEmailManager _emailManager;
+
+    public AgentManager(IAgentRepository agentRepository, IOtpManager otpManager, IEmailManager emailManager)
     {
         _agentRepository = agentRepository;
+        _otpManager = otpManager;
+        _emailManager = emailManager;
     }
 
     public async Task<List<AgentDashBoardResponse>> GetAgentDashBoardData(long? agentId)
@@ -52,7 +60,7 @@ public class AgentManager : IAgentManager
                 agentCaseOverViewResponse.ModuleName = agentCaseOverViewResponsesList.ModuleName;
                 agentCaseOverViewResponse.LogDateTime = agentCaseOverViewResponsesList.LogDateTime;
                 agentCaseOverViewResponse.Comments = new List<AgentOverViewCommentResponse>();
-                if(agentCaseOverViewResponsesList.Comments.Count > 0)
+                if (agentCaseOverViewResponsesList.Comments.Count > 0)
                 {
                     List<AgentOverViewCommentResponse> agentOverViewCommentResponses = new List<AgentOverViewCommentResponse>();
                     foreach (var comment in agentCaseOverViewResponsesList.Comments)
@@ -76,7 +84,7 @@ public class AgentManager : IAgentManager
         AgentCustomerResponse agentCustomerResponse = new AgentCustomerResponse();
         if (agentCustomerResponseModels != null && agentCustomerResponseModels.BpNo != 0)
         {
-            agentCustomerResponse.FleedId = agentCustomerResponseModels.FleedId;
+            agentCustomerResponse.FleetId = agentCustomerResponseModels.FleetId;
             agentCustomerResponse.FanNo = agentCustomerResponseModels.FanNo;
             agentCustomerResponse.PanNo = agentCustomerResponseModels.PanNo;
             agentCustomerResponse.MobileNo = agentCustomerResponseModels.MobileNo;
@@ -120,6 +128,7 @@ public class AgentManager : IAgentManager
             {
                 AgentRejectedFleetResponse agentRejectedFleet = new AgentRejectedFleetResponse();
                 agentRejectedFleet.FleetId = agentRejectedFleetResponse.FleetId;
+                agentRejectedFleet.VehicleID = agentRejectedFleetResponse.VehicleID;
                 agentRejectedFleet.RcNo = agentRejectedFleetResponse.RcNo;
                 agentRejectedFleet.OwnerName = agentRejectedFleetResponse.OwnerName;
                 agentRejectedFleet.RegistrationDate = agentRejectedFleetResponse.RegistrationDate;
@@ -142,6 +151,7 @@ public class AgentManager : IAgentManager
             {
                 AgentApprovedFleetResponse agentApprovedFleet = new AgentApprovedFleetResponse();
                 agentApprovedFleet.FleetId = agentApprovedFleetResponse.FleetId;
+                agentApprovedFleet.VehicleID = agentApprovedFleetResponse.VehicleID;
                 agentApprovedFleet.RcNo = agentApprovedFleetResponse.RcNo;
                 agentApprovedFleet.OwnerName = agentApprovedFleetResponse.OwnerName;
                 agentApprovedFleet.RegistrationDate = agentApprovedFleetResponse.RegistrationDate;
@@ -213,7 +223,7 @@ public class AgentManager : IAgentManager
 
         AssignFleetResponseModel assignFleetResponseModel = await _agentRepository.AssignFleet(assignFleetRequestModel);
 
-        if(assignFleetResponseModel != null && assignFleetResponseModel.FleetID != 0)
+        if (assignFleetResponseModel != null && assignFleetResponseModel.FleetID != 0)
         {
             assignFleetResponse.Message = "Updated Successfully";
         }
@@ -227,7 +237,7 @@ public class AgentManager : IAgentManager
         AgentCustomerResponse agentCustomerResponse = new AgentCustomerResponse();
         if (agentCustomerResponseModels != null && agentCustomerResponseModels.BpNo != 0)
         {
-            agentCustomerResponse.FleedId = agentCustomerResponseModels.FleedId;
+            agentCustomerResponse.FleetId = agentCustomerResponseModels.FleetId;
             agentCustomerResponse.FanNo = agentCustomerResponseModels.FanNo;
             agentCustomerResponse.PanNo = agentCustomerResponseModels.PanNo;
             agentCustomerResponse.MobileNo = agentCustomerResponseModels.MobileNo;
@@ -238,5 +248,56 @@ public class AgentManager : IAgentManager
             agentCustomerResponse.Comment = agentCustomerResponseModels.Comment;
         }
         return agentCustomerResponse;
+    }
+
+    public async Task<List<AgentListDataResponse>> GetAgentLists(AgentListDataRequest agentListDataRequest)
+    {
+        List<AgentListDataResponse> agentListDataResponses = new List<AgentListDataResponse>();
+
+        AgentListDataRequestModel agentListDataRequestModel = new AgentListDataRequestModel();
+        agentListDataRequestModel.UserType = agentListDataRequest.UserType;
+        agentListDataRequestModel.AgentId = agentListDataRequest.AgentId;
+
+        List<AgentListDataResponseModel> agentListDataResponseModels = await _agentRepository.GetAgentLists(agentListDataRequestModel);
+
+        if (agentListDataResponseModels.Count > 0)
+        {
+            foreach (var model in agentListDataResponseModels)
+            {
+                AgentListDataResponse agentListDataResponse = new AgentListDataResponse();
+                agentListDataResponse.EmpId = model.EmpId;
+                agentListDataResponse.EmpName = model.EmpName;
+                agentListDataResponses.Add(agentListDataResponse);
+            }
+        }
+
+        return agentListDataResponses;
+    }
+
+    public async Task<SendOtpToCustomerResponse> SendOtpToCustomer(SendOtpToCustomerRequest sendOtpToCustomerRequest)
+    {
+        SendOtpToCustomerResponse sendOtpToCustomerResponse = new SendOtpToCustomerResponse();
+
+        OtpRequest otpRequest = new OtpRequest();
+        otpRequest.MobileNo = sendOtpToCustomerRequest.MobileNo;
+        otpRequest.Type = "Login";
+        OtpResponse otpResponse = await _otpManager.SendOtpAsync(otpRequest);
+        if (otpResponse != null && !string.IsNullOrEmpty(otpResponse.RequestId))
+        {
+            SendAgentEmailRequest sendAgentEmailRequest = new SendAgentEmailRequest();
+            sendAgentEmailRequest.Url = "http://172.26.101.56:8080/#/";
+            sendAgentEmailRequest.Module = "Login";
+            sendAgentEmailRequest.SubModule = "Otp";
+            sendAgentEmailRequest.Template = "EMAIL";
+            sendAgentEmailRequest.MobileNo = sendOtpToCustomerRequest.MobileNo;
+            SendAgentEmailResponse sendAgentEmailResponse = await _emailManager.SendAgentEmail(sendAgentEmailRequest);
+
+            if (sendAgentEmailResponse != null && !string.IsNullOrEmpty(sendAgentEmailResponse.Message))
+            {
+                sendOtpToCustomerResponse.Message = sendAgentEmailResponse.Message;
+            }
+        }
+
+        return sendOtpToCustomerResponse;
     }
 }

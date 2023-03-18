@@ -1,22 +1,32 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Options;
+using System.Data;
 using System.Text.Json;
 using Tmf.Saarthi.Core.Constants;
 using Tmf.Saarthi.Core.Options;
 using Tmf.Saarthi.Infrastructure.HttpService;
 using Tmf.Saarthi.Infrastructure.Interfaces;
+using Tmf.Saarthi.Infrastructure.Models.Request.CPCFacility;
 using Tmf.Saarthi.Infrastructure.Models.Request.Ocr;
+using Tmf.Saarthi.Infrastructure.Models.Response.CPCFacility;
 using Tmf.Saarthi.Infrastructure.Models.Response.Ocr;
+using Tmf.Saarthi.Infrastructure.SqlService;
 
 namespace Tmf.Saarthi.Infrastructure.Services;
 
 public class OcrRepository : IOcrRepository
 {
     private readonly IHttpService _httpService;
+    private readonly ISqlUtility _sqlUtility;
     private readonly OcrOptions _ocrOptions;
-    public OcrRepository(IHttpService httpService, IOptions<OcrOptions> ocrOptions)
+    private readonly ConnectionStringsOptions _connectionStringsOptions;
+
+    public OcrRepository(IHttpService httpService, IOptions<OcrOptions> ocrOptions, IOptions<ConnectionStringsOptions> connectionStringsOptions, ISqlUtility sqlUtility)
     {
         _httpService = httpService;
         _ocrOptions = ocrOptions.Value;
+        _connectionStringsOptions = connectionStringsOptions.Value;
+        _sqlUtility = sqlUtility;
     }
 
     public async Task<AadharExtractResponseModel> AadharExtract(AadharExtractRequestModel aadharExtractRequestModel)
@@ -143,7 +153,7 @@ public class OcrRepository : IOcrRepository
         Url = Url.Replace("{ReqType}", taskDetailRequestModel.RequestType);
 
         JsonDocument result = await _httpService.GetAsync(Url, headers);
-         
+
         var data = JsonSerializer.Deserialize<List<TOut>>(result, jsonSerializerOptions) ?? throw new ArgumentNullException();
         if (data.Count > 0)
         {
@@ -153,5 +163,71 @@ public class OcrRepository : IOcrRepository
         {
             return null;
         }
+    }
+
+    public async Task<OCRUploadDocumentResponseModel> UploadOcrDocuments(OCRUploadDocumentRequestModel oCRUploadDocumentRequestModel)
+    {
+        List<SqlParameter> parameters = new List<SqlParameter>()
+    {
+        new SqlParameter("FleetID", oCRUploadDocumentRequestModel.FleetID),
+        new SqlParameter("StagId", oCRUploadDocumentRequestModel.StagId),
+        new SqlParameter("DocumentType", oCRUploadDocumentRequestModel.DocumentType),
+        new SqlParameter("DocumentExtension", oCRUploadDocumentRequestModel.DocumentExtension),
+        new SqlParameter("DocumentURL", oCRUploadDocumentRequestModel.DocumentURL_1),
+    };
+
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_InsertOcrVerifiedDocuments", parameters);
+
+        if (oCRUploadDocumentRequestModel.DocumentURL_2 != null)
+        {
+            List<SqlParameter> parameters1 = new List<SqlParameter>()
+    {
+        new SqlParameter("FleetID", oCRUploadDocumentRequestModel.FleetID),
+        new SqlParameter("StagId", oCRUploadDocumentRequestModel.StagId),
+        new SqlParameter("DocumentType", oCRUploadDocumentRequestModel.DocumentType),
+        new SqlParameter("DocumentExtension", oCRUploadDocumentRequestModel.DocumentExtension),
+        new SqlParameter("DocumentURL", oCRUploadDocumentRequestModel.DocumentURL_2),
+    };
+
+            DataTable dt1 = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_InsertOcrVerifiedDocuments", parameters1);
+
+        }
+        OCRUploadDocumentResponseModel oCRUploadDocumentResponseModel = new OCRUploadDocumentResponseModel();
+        if (dt.Rows.Count > 0)
+        {
+            oCRUploadDocumentResponseModel.FleetID = Convert.ToInt64(dt.Rows[0]["FleetID"]);
+        }
+
+        return oCRUploadDocumentResponseModel;
+    }
+
+
+    public async Task<OCRUploadAddressResponseModel> UploadOcrAddress(OCRUploadAddressRequestModel oCRUploadAddressRequestModel)
+    {
+        List<SqlParameter> parameters = new List<SqlParameter>()
+    {
+        new SqlParameter("BPNumber", oCRUploadAddressRequestModel.BPNo),
+        new SqlParameter("Type", "Default"),
+        new SqlParameter("AddressLine1", oCRUploadAddressRequestModel.Address),
+        new SqlParameter("AddressLine2", oCRUploadAddressRequestModel.StreetAddress),
+        new SqlParameter("Landmark", ""),
+        new SqlParameter("City", ""),
+        new SqlParameter("District", oCRUploadAddressRequestModel.District),
+        new SqlParameter("Region", oCRUploadAddressRequestModel.State),
+        new SqlParameter("Country","India"),
+        new SqlParameter("Pincode",Convert.ToInt32(oCRUploadAddressRequestModel.Pincode)),
+        new SqlParameter("IsDefault",true),
+
+    };
+
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_InsertCustomerAddress", parameters);
+
+        OCRUploadAddressResponseModel oCRUploadAddressResponseModel = new OCRUploadAddressResponseModel();
+        if (dt.Rows.Count > 0)
+        {
+            oCRUploadAddressResponseModel.AddressID = Convert.ToInt64(dt.Rows[0]["AddressID"]);
+        }
+
+        return oCRUploadAddressResponseModel;
     }
 }

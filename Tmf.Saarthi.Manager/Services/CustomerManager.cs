@@ -1,7 +1,7 @@
-﻿using Tmf.Saarthi.Core.RequestModels.Customer;
-using Tmf.Saarthi.Core.RequestModels.Fleet;
+﻿using Tmf.Saarthi.Core.Constants;
+using Tmf.Saarthi.Core.RequestModels.Customer;
 using Tmf.Saarthi.Core.ResponseModels.Customer;
-using Tmf.Saarthi.Core.ResponseModels.Fleet;
+using Tmf.Saarthi.Core.ResponseModels.Natch;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Customer;
 using Tmf.Saarthi.Infrastructure.Models.Response.Customer;
@@ -120,11 +120,12 @@ public class CustomerManager : ICustomerManager
         customerAddressRequestModel.IsDefault = true;
 
         CustomerAddressResponseModel customerAddressResponseModel = await _customerAddressRepository.AddCustomerAddress(customerAddressRequestModel);
-        
+
         CustomerAddressResponse customerAddressResponse = new CustomerAddressResponse();
-        if(customerAddressResponseModel.AddressID > 0)
+        if (customerAddressResponseModel.AddressID > 0)
         {
             customerAddressResponse.AddressID = customerAddressResponseModel.AddressID;
+            customerAddressResponse.BPNumber = customerAddressResponseModel.BPNumber;
             customerAddressResponse.Type = customerAddressResponseModel.Type;
             customerAddressResponse.AddressLine1 = customerAddressResponseModel.AddressLine1;
             customerAddressResponse.AddressLine2 = customerAddressResponseModel.AddressLine2;
@@ -135,8 +136,48 @@ public class CustomerManager : ICustomerManager
             customerAddressResponse.Country = customerAddressResponseModel.Country;
             customerAddressResponse.Pincode = customerAddressResponseModel.Pincode;
         }
-      
+
         return customerAddressResponse;
+    }
+
+    public async Task<CustomerAddressResponse> GetChangedAddress(long bpNumber)
+    {
+        CustomerAddressResponse customerAddressResponse = new CustomerAddressResponse();
+        CustomerAddressResponseModel customerAddressResponseModel = await _customerAddressRepository.GetChangedAddress(bpNumber);
+        customerAddressResponse.AddressID = customerAddressResponseModel.AddressID;
+        customerAddressResponse.BPNumber = customerAddressResponseModel.BPNumber;
+        customerAddressResponse.Type = customerAddressResponseModel.Type;
+        customerAddressResponse.AddressLine1 = customerAddressResponseModel.AddressLine1;
+        customerAddressResponse.AddressLine2 = customerAddressResponseModel.AddressLine2;
+        customerAddressResponse.Landmark = customerAddressResponseModel.Landmark;
+        customerAddressResponse.City = customerAddressResponseModel.City;
+        customerAddressResponse.District = customerAddressResponseModel.District;
+        customerAddressResponse.Region = customerAddressResponseModel.Region;
+        customerAddressResponse.Country = customerAddressResponseModel.Country;
+        customerAddressResponse.Pincode = customerAddressResponseModel.Pincode;
+
+        return customerAddressResponse;
+    }
+
+    public async Task<CustomerDataResponse> GetCustomerData(long fleetId)
+    {
+        CustomerDataResponseModel adminFleetResponseModel = await _customerAddressRepository.GetCustomerData(fleetId);
+
+        CustomerDataResponse customerDataResponse = new CustomerDataResponse();
+        if (adminFleetResponseModel != null)
+        {
+            customerDataResponse.BPNumber = adminFleetResponseModel.BPNumber;
+            customerDataResponse.FleetID = adminFleetResponseModel.FleetID;
+            customerDataResponse.FirstName = adminFleetResponseModel.FirstName;
+            customerDataResponse.MiddleName = adminFleetResponseModel.MiddleName;
+            customerDataResponse.LastName = adminFleetResponseModel.LastName;
+            customerDataResponse.Dob = adminFleetResponseModel.Dob;
+            customerDataResponse.Gender = adminFleetResponseModel.Gender;
+            customerDataResponse.PanNo = adminFleetResponseModel.PanNo;
+            customerDataResponse.FanNo = adminFleetResponseModel.FanNo;
+            customerDataResponse.MobileNo = adminFleetResponseModel.MobileNo;
+        }
+        return customerDataResponse;
     }
 
     public async Task<CustomerAddressResponse> GetCustomerAddresses(long bpNumber)
@@ -154,8 +195,23 @@ public class CustomerManager : ICustomerManager
         customerAddressResponse.Region = customerAddressResponseModel.Region;
         customerAddressResponse.Country = customerAddressResponseModel.Country;
         customerAddressResponse.Pincode = customerAddressResponseModel.Pincode;
-
         return customerAddressResponse;
+    }
+
+
+    public async Task<List<DropResponse>> GetDocumentType()
+    {
+        List<DropResponse> bankResponses = new List<DropResponse>();
+
+        foreach (OCRDocuments enumValue in Enum.GetValues(typeof(OCRDocuments)))
+        {
+            DropResponse bankResponse = new DropResponse();
+            bankResponse.Id = Convert.ToInt64(enumValue);
+            bankResponse.DisplayName = Convert.ToString(enumValue);
+            bankResponses.Add(bankResponse);
+        }
+
+        return bankResponses.OrderBy(x=> x.DisplayName).ToList();
     }
 }
 

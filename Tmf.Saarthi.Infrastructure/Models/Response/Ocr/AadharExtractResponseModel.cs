@@ -65,7 +65,7 @@ public class ExtractionOutputAadhar
     public string IdNumber { get; set; } = string.Empty;
 
     [JsonPropertyName("is_scanned")]
-    public string IsScanned { get; set; } = string.Empty;
+    public bool? IsScanned { get; set; }
 
     [JsonPropertyName("name_on_card")]
     public string NameOnCard { get; set; } = string.Empty;

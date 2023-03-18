@@ -9,5 +9,6 @@ public class EmployeeLoginResponse
     public string LastName { get; set; } = string.Empty;
     public string MobileNo { get; set; } = string.Empty;
     public string EmailID { get; set; } = string.Empty;
+    public long RoleId { get; set; }
     public string Role { get; set; } = string.Empty;
 }

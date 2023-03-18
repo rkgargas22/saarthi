@@ -1,10 +1,12 @@
-﻿using Tmf.Saarthi.Core.RequestModels.Ocr;
+﻿using Microsoft.AspNetCore.Authorization;
+using Tmf.Saarthi.Core.RequestModels.Ocr;
 using Tmf.Saarthi.Core.ResponseModels.Ocr;
 
 namespace Tmf.Saarthi.Api.Controllers;
-
+//[Authorize()]
 [Route("api/[controller]")]
 [ApiController]
+
 public class OcrController : ControllerBase
 {
     private readonly IOcrManager _ocrManager;

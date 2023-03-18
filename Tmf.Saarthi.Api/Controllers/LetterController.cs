@@ -1,4 +1,5 @@
-﻿using Tmf.Saarthi.Core.ResponseModels.CustomerConsent;
+﻿using Tmf.Saarthi.Core.RequestModels.Letter;
+using Tmf.Saarthi.Core.ResponseModels.CustomerConsent;
 using Tmf.Saarthi.Core.ResponseModels.FuelLoanAgreement;
 using Tmf.Saarthi.Core.ResponseModels.ProvisionalLette;
 using Tmf.Saarthi.Core.ResponseModels.SanctionLetter;
@@ -10,10 +11,10 @@ namespace Tmf.Saarthi.Api.Controllers;
 public class LetterController : ControllerBase
 {
     private readonly ICustomerConsentManager _customerConsentManager;
-    private readonly ISanctionLetterManager _sanctionLetterManager;  
+    private readonly ISanctionLetterManager _sanctionLetterManager;
     private readonly IFuelLoanAggrementManager _fuelLoanAggrementManager;
     private readonly IProvisionalLetterManager _provisionalLetterManager;
-    public LetterController(ICustomerConsentManager customerConsentManager, 
+    public LetterController(ICustomerConsentManager customerConsentManager,
         ISanctionLetterManager sanctionLetterManager,
         IFuelLoanAggrementManager fuelLoanAggrementManager,
         IProvisionalLetterManager provisionalLetterManager
@@ -25,8 +26,8 @@ public class LetterController : ControllerBase
         _provisionalLetterManager = provisionalLetterManager;
     }
 
-    [Route("CustomerConsent")]
     [HttpGet]
+    [Route("CustomerConsent")]
     [ProducesDefaultResponseType(typeof(CustomerConsentResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(CustomerConsentResponse), StatusCodes.Status200OK)]
@@ -41,14 +42,16 @@ public class LetterController : ControllerBase
         return CreatedAtAction(nameof(CustomerConsent), null, customerConsentResponse);
     }
 
-    [Route("Sanction/{FleetID}")]
     [HttpGet]
+    [Route("Sanction/{FleetId}")]
     [ProducesDefaultResponseType(typeof(SanctionLetterResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(SanctionLetterResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> Sanction([FromRoute] long FleetID)
+    public async Task<IActionResult> Sanction([FromRoute] long FleetId)
     {
-        SanctionLetterResponse sanctionLetterResponse = await _sanctionLetterManager.GenerateSanctionLetter(FleetID);
+        long CreatedBy = 1; // CreatedBy will get from response herder when authentication will implement.
+
+        SanctionLetterResponse sanctionLetterResponse = await _sanctionLetterManager.GenerateSanctionLetter(FleetId, CreatedBy);
         if (string.IsNullOrEmpty(sanctionLetterResponse.Letter))
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.DataNotAvailable, Error = ValidationMessages.IdNotFound });
@@ -57,14 +60,16 @@ public class LetterController : ControllerBase
         return Ok(sanctionLetterResponse);
     }
 
-    [Route("LoanAgreement/{FleetID}")]
     [HttpGet]
+    [Route("LoanAgreement/{FleetId}")]
     [ProducesDefaultResponseType(typeof(FuelLoanAgreementResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(FuelLoanAgreementResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> LoanAgreement([FromRoute] long FleetID)
+    public async Task<IActionResult> LoanAgreement([FromRoute] long FleetId)
     {
-        FuelLoanAgreementResponse fuelLoanAgreementResponse = await _fuelLoanAggrementManager.GenerateFuelLoanAgreement(FleetID);
+        long CreatedBy = 1; // CreatedBy will get from response herder when authentication will implement.
+
+        FuelLoanAgreementResponse fuelLoanAgreementResponse = await _fuelLoanAggrementManager.GenerateFuelLoanAgreement(FleetId, CreatedBy);
         if (string.IsNullOrEmpty(fuelLoanAgreementResponse.Letter))
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.DataNotAvailable, Error = ValidationMessages.IdNotFound });
@@ -87,19 +92,35 @@ public class LetterController : ControllerBase
         return Ok(customerConsentDocumentByFleet);
     }
 
-    [Route("ProvisionalLetter/{FleetID}")]
+
     [HttpGet]
-    [ProducesDefaultResponseType(typeof(ProvisionalLetteResponse))]
+    [Route("ProvisionalLetter/{FleetId}")]
+    [ProducesDefaultResponseType(typeof(ProvisionalLetterResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProvisionalLetteResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ProvisionalLetter([FromRoute] long FleetID)
+    [ProducesResponseType(typeof(ProvisionalLetterResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ProvisionalLetter([FromRoute] long FleetId)
     {
-        ProvisionalLetteResponse provisionalLetteResponse = await _provisionalLetterManager.GenerateprovisionalLetter(FleetID);
+        long CreatedBy = 1; // CreatedBy will get from response herder when authentication will implement.
+
+        ProvisionalLetterResponse provisionalLetteResponse = await _provisionalLetterManager.GenerateProvisionalLetter(FleetId, CreatedBy);
         if (string.IsNullOrEmpty(provisionalLetteResponse.Letter))
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.DataNotAvailable, Error = ValidationMessages.IdNotFound });
         }
 
         return Ok(provisionalLetteResponse);
+    }
+
+
+    [Route("DisagreeProvisionalLetter")]
+    [HttpPatch]
+    [ProducesDefaultResponseType(typeof(ProvisionalLetterResponse))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProvisionalLetterResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> DisagreeProvisionalLetter([FromBody] DisagreeProvisionalResquest disagreeProvisionalResquest)
+    {
+        DisagreeProvisionalResponse disagreeProvisionalResponse = await _provisionalLetterManager.DisagreeProvisionalLetter(disagreeProvisionalResquest);
+
+        return Ok(disagreeProvisionalResponse);
     }
 }

@@ -4,5 +4,5 @@ namespace Tmf.Saarthi.Manager.Interfaces;
 
 public interface ISanctionLetterManager
 {
-    Task<SanctionLetterResponse> GenerateSanctionLetter(long FleetID);
+    Task<SanctionLetterResponse> GenerateSanctionLetter(long FleetId, long CreatedBy);
 }

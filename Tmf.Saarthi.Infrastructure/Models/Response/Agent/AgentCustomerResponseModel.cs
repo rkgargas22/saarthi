@@ -16,8 +16,8 @@ public class AgentCustomerResponseModel
     [JsonPropertyName("bpNo")]
     public long BpNo { get; set; }
 
-    [JsonPropertyName("fleedID")]
-    public long FleedId { get; set; }
+    [JsonPropertyName("fleetID")]
+    public long FleetId { get; set; }
 
     [JsonPropertyName("firstName")]
     public string FirstName { get; set; } = string.Empty;

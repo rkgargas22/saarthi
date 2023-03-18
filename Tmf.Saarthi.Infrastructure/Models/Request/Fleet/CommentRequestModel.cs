@@ -8,8 +8,10 @@ public class CommentRequestModel
     public long FleetID { get; set; }
     [JsonPropertyName("comment")]
     public string Comment { get; set; } = string.Empty;
-    [JsonPropertyName("updatedBy")]
-    public long UpdatedBy { get; set; }
-    [JsonPropertyName("updatedDate")]
-    public DateTime UpdatedDate { get; set; }
+    [JsonPropertyName("createdBy")]
+    public long CreatedBy { get; set; }
+    [JsonPropertyName("createdUserType")]
+    public string CreatedUserType { get; set; } = string.Empty;
+    [JsonPropertyName("createdDate")]
+    public DateTime CreatedDate { get; set; }
 }

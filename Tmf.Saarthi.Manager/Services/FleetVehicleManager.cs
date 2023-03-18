@@ -51,6 +51,7 @@ public class FleetVehicleManager : IFleetVehicleManager
         addFleetVehicleResponse.VehicleID = addFleetVehicleResponseModel.VehicleID;
         addFleetVehicleResponse.FleetID = addFleetVehicleRequestModel.FleetID;
         addFleetVehicleResponse.RCNo = addFleetVehicleRequestModel.RCNo;
+        addFleetVehicleResponse.ErrorMessage = addFleetVehicleResponseModel.ErrorMessage;
 
         return addFleetVehicleResponse;
     }
@@ -242,95 +243,135 @@ public class FleetVehicleManager : IFleetVehicleManager
 
         InstaVeritaResponseModel instaVeritaResponseModel = await _fleetVehicleRepository.GetInstaVeritaDetailsByRC(RCNo);
 
-        if (instaVeritaResponseModel != null && string.IsNullOrEmpty(instaVeritaResponseModel.ChassisNumber))
+        //if (instaVeritaResponseModel != null && string.IsNullOrEmpty(instaVeritaResponseModel.ChassisNumber))
+        //{
+        //    instaVeritaResponseModel = await _fleetVehicleRepository.GetInstaVeritaDetails(RCNo);
+        //    if (instaVeritaResponseModel != null)
+        //    {
+        //        instaVeritaResponse.Blacklisted = (instaVeritaResponseModel.Blacklisted.ToString() is not "" and not "NA") ? Convert.ToBoolean(instaVeritaResponseModel.Blacklisted.ToString()) : null;
+        //        instaVeritaResponse.BlacklistedReason = instaVeritaResponseModel.BlacklistedReason;
+        //        instaVeritaResponse.ChassisNumber = instaVeritaResponseModel.ChassisNumber;
+        //        instaVeritaResponse.EngineNumber = instaVeritaResponseModel.EngineNumber;
+        //        instaVeritaResponse.ExpiryDate = (instaVeritaResponseModel.ExpiryDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(instaVeritaResponseModel.ExpiryDate.ToString()) : null;
+        //        instaVeritaResponse.FitnessCertificateExpiryDate = (instaVeritaResponseModel.FitnessCertificateExpiryDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(instaVeritaResponseModel.FitnessCertificateExpiryDate.ToString()) : null;
+        //        instaVeritaResponse.FinancingAuthority = instaVeritaResponseModel.FinancingAuthority;
+        //        instaVeritaResponse.FuelType = instaVeritaResponseModel.FuelType;
+        //        instaVeritaResponse.MVTaxPaidUpto = instaVeritaResponseModel.MVTaxPaidUpto;
+        //        instaVeritaResponse.MVTaxStructure = instaVeritaResponseModel.MVTaxStructure;
+        //        instaVeritaResponse.OwnersName = instaVeritaResponseModel.OwnersName;
+        //        instaVeritaResponse.OwnerSerialNumber = instaVeritaResponseModel.OwnerSerialNumber;
+        //        instaVeritaResponse.PuccUpto = instaVeritaResponseModel.PuccUpto;
+        //        instaVeritaResponse.RegistrationNumber = instaVeritaResponseModel.RegistrationNumber;
+        //        instaVeritaResponse.RegistrationDate = (instaVeritaResponseModel.RegistrationDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(instaVeritaResponseModel.RegistrationDate.ToString()) : null;
+        //        instaVeritaResponse.RegisteringAuthority = instaVeritaResponseModel.RegisteringAuthority;
+        //        instaVeritaResponse.RegistrationState = instaVeritaResponseModel.RegistrationState;
+        //        instaVeritaResponse.VehicleCompany = instaVeritaResponseModel.VehicleCompany;
+        //        instaVeritaResponse.VehicleModel = instaVeritaResponseModel.VehicleModel;
+        //        instaVeritaResponse.VehicleType = instaVeritaResponseModel.VehicleType;
+        //        instaVeritaResponse.VehicleAge = instaVeritaResponseModel.VehicleAge;
+        //        instaVeritaResponse.BlacklistedDetails = new List<BlackListDetails>();
+        //        if (instaVeritaResponseModel.BlacklistedDetails.Count > 0)
+        //        {
+        //            foreach (var blackListedData in instaVeritaResponseModel.BlacklistedDetails)
+        //            {
+        //                BlackListDetails blackListDetails = new BlackListDetails();
+        //                blackListDetails.RegistrationState = blackListedData.RegistrationState;
+        //                blackListDetails.RegisteringAuthority = blackListedData.RegisteringAuthority;
+        //                blackListDetails.RcNumber = blackListedData.RcNumber;
+        //                blackListDetails.FirNumber = blackListedData.FirNumber;
+        //                blackListDetails.FirDate = (blackListedData.FirDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(blackListedData.FirDate.ToString()) : null;
+        //                blackListDetails.BlacklistedReason = blackListedData.BlacklistedReason;
+        //                blackListDetails.BlacklistedDate = (blackListedData.BlacklistedDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(blackListedData.BlacklistedDate.ToString()) : null;
+        //                instaVeritaResponse.BlacklistedDetails.Add(blackListDetails);
+        //            }
+        //        }
+        //    }
+        //}
+        //else
+        //{
+        //    if (instaVeritaResponseModel != null)
+        //    {
+        //        instaVeritaResponse.Blacklisted = !(instaVeritaResponseModel.Blacklisted is String && (string.IsNullOrEmpty(instaVeritaResponseModel.Blacklisted) || Convert.ToString(instaVeritaResponseModel.Blacklisted) == "NA")) ? Convert.ToBoolean(instaVeritaResponseModel.Blacklisted) : null;
+        //        instaVeritaResponse.BlacklistedReason = instaVeritaResponseModel.BlacklistedReason;
+        //        instaVeritaResponse.ChassisNumber = instaVeritaResponseModel.ChassisNumber;
+        //        instaVeritaResponse.EngineNumber = instaVeritaResponseModel.EngineNumber;
+        //        instaVeritaResponse.ExpiryDate = !(instaVeritaResponseModel.ExpiryDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.ExpiryDate) || Convert.ToString(instaVeritaResponseModel.ExpiryDate) == "NA")) ? (instaVeritaResponseModel.ExpiryDate != null ? Convert.ToDateTime(instaVeritaResponseModel.ExpiryDate) : null) : null;
+        //        instaVeritaResponse.FitnessCertificateExpiryDate = !(instaVeritaResponseModel.FitnessCertificateExpiryDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.FitnessCertificateExpiryDate) || Convert.ToString(instaVeritaResponseModel.FitnessCertificateExpiryDate) == "NA")) ? (instaVeritaResponseModel.FitnessCertificateExpiryDate != null ? Convert.ToDateTime(instaVeritaResponseModel.FitnessCertificateExpiryDate) : null) : null;
+        //        instaVeritaResponse.FinancingAuthority = instaVeritaResponseModel.FinancingAuthority;
+        //        instaVeritaResponse.FuelType = instaVeritaResponseModel.FuelType;
+        //        instaVeritaResponse.MVTaxPaidUpto = instaVeritaResponseModel.MVTaxPaidUpto;
+        //        instaVeritaResponse.MVTaxStructure = instaVeritaResponseModel.MVTaxStructure;
+        //        instaVeritaResponse.OwnersName = instaVeritaResponseModel.OwnersName;
+        //        instaVeritaResponse.OwnerSerialNumber = instaVeritaResponseModel.OwnerSerialNumber;
+        //        instaVeritaResponse.PuccUpto = instaVeritaResponseModel.PuccUpto;
+        //        instaVeritaResponse.RegistrationNumber = instaVeritaResponseModel.RegistrationNumber;
+        //        instaVeritaResponse.RegistrationDate = !(instaVeritaResponseModel.RegistrationDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.RegistrationDate) || Convert.ToString(instaVeritaResponseModel.RegistrationDate) == "NA")) ? (instaVeritaResponseModel.RegistrationDate != null ? Convert.ToDateTime(instaVeritaResponseModel.RegistrationDate) : null) : null;
+        //        instaVeritaResponse.RegisteringAuthority = instaVeritaResponseModel.RegisteringAuthority;
+        //        instaVeritaResponse.RegistrationState = instaVeritaResponseModel.RegistrationState;
+        //        instaVeritaResponse.VehicleCompany = instaVeritaResponseModel.VehicleCompany;
+        //        instaVeritaResponse.VehicleModel = instaVeritaResponseModel.VehicleModel;
+        //        instaVeritaResponse.VehicleType = instaVeritaResponseModel.VehicleType;
+        //        instaVeritaResponse.VehicleAge = instaVeritaResponseModel.VehicleAge;
+        //        instaVeritaResponse.BlacklistedDetails = new List<BlackListDetails>();
+        //        if (instaVeritaResponseModel.BlacklistedDetails.Count > 0)
+        //        {
+        //            foreach (var blackListedData in instaVeritaResponseModel.BlacklistedDetails)
+        //            {
+        //                BlackListDetails blackListDetails = new BlackListDetails();
+        //                blackListDetails.RegistrationState = blackListedData.RegistrationState;
+        //                blackListDetails.RegisteringAuthority = blackListedData.RegisteringAuthority;
+        //                blackListDetails.RcNumber = blackListedData.RcNumber;
+        //                blackListDetails.FirNumber = blackListedData.FirNumber;
+        //                blackListDetails.FirDate = !(blackListedData.FirDate is String && (string.IsNullOrEmpty(blackListedData.FirDate) || Convert.ToString(blackListedData.FirDate) == "NA")) ? (blackListedData.FirDate != null ? Convert.ToDateTime(blackListedData.FirDate) : null) : null;
+        //                blackListDetails.BlacklistedReason = blackListedData.BlacklistedReason;
+        //                blackListDetails.BlacklistedDate = !(blackListedData.BlacklistedDate is String && (string.IsNullOrEmpty(blackListedData.BlacklistedDate) || Convert.ToString(blackListedData.BlacklistedDate) == "NA")) ? (blackListedData.BlacklistedDate != null ? Convert.ToDateTime(blackListedData.BlacklistedDate) : null) : null;
+        //                instaVeritaResponse.BlacklistedDetails.Add(blackListDetails);
+        //            }
+        //        }
+        //    }
+        //}
+
+        if (instaVeritaResponseModel != null)
         {
-            instaVeritaResponseModel = await _fleetVehicleRepository.GetInstaVeritaDetails(RCNo);
-            if (instaVeritaResponseModel != null)
+            instaVeritaResponse.Blacklisted = !(instaVeritaResponseModel.Blacklisted is String && (string.IsNullOrEmpty(instaVeritaResponseModel.Blacklisted) || Convert.ToString(instaVeritaResponseModel.Blacklisted) == "NA")) ? Convert.ToBoolean(instaVeritaResponseModel.Blacklisted) : null;
+            instaVeritaResponse.BlacklistedReason = instaVeritaResponseModel.BlacklistedReason;
+            instaVeritaResponse.ChassisNumber = instaVeritaResponseModel.ChassisNumber;
+            instaVeritaResponse.EngineNumber = instaVeritaResponseModel.EngineNumber;
+            instaVeritaResponse.ExpiryDate = !(instaVeritaResponseModel.ExpiryDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.ExpiryDate) || Convert.ToString(instaVeritaResponseModel.ExpiryDate) == "NA")) ? (instaVeritaResponseModel.ExpiryDate != null ? Convert.ToDateTime(instaVeritaResponseModel.ExpiryDate) : null) : null;
+            instaVeritaResponse.FitnessCertificateExpiryDate = !(instaVeritaResponseModel.FitnessCertificateExpiryDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.FitnessCertificateExpiryDate) || Convert.ToString(instaVeritaResponseModel.FitnessCertificateExpiryDate) == "NA")) ? (instaVeritaResponseModel.FitnessCertificateExpiryDate != null ? Convert.ToDateTime(instaVeritaResponseModel.FitnessCertificateExpiryDate) : null) : null;
+            instaVeritaResponse.FinancingAuthority = instaVeritaResponseModel.FinancingAuthority;
+            instaVeritaResponse.FuelType = instaVeritaResponseModel.FuelType;
+            instaVeritaResponse.MVTaxPaidUpto = instaVeritaResponseModel.MVTaxPaidUpto;
+            instaVeritaResponse.MVTaxStructure = instaVeritaResponseModel.MVTaxStructure;
+            instaVeritaResponse.OwnersName = instaVeritaResponseModel.OwnersName;
+            instaVeritaResponse.OwnerSerialNumber = instaVeritaResponseModel.OwnerSerialNumber;
+            instaVeritaResponse.PuccUpto = instaVeritaResponseModel.PuccUpto;
+            instaVeritaResponse.RegistrationNumber = instaVeritaResponseModel.RegistrationNumber;
+            instaVeritaResponse.RegistrationDate = !(instaVeritaResponseModel.RegistrationDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.RegistrationDate) || Convert.ToString(instaVeritaResponseModel.RegistrationDate) == "NA")) ? (instaVeritaResponseModel.RegistrationDate != null ? Convert.ToDateTime(instaVeritaResponseModel.RegistrationDate) : null) : null;
+            instaVeritaResponse.RegisteringAuthority = instaVeritaResponseModel.RegisteringAuthority;
+            instaVeritaResponse.RegistrationState = instaVeritaResponseModel.RegistrationState;
+            instaVeritaResponse.VehicleCompany = instaVeritaResponseModel.VehicleCompany;
+            instaVeritaResponse.VehicleModel = instaVeritaResponseModel.VehicleModel;
+            instaVeritaResponse.VehicleType = instaVeritaResponseModel.VehicleType;
+            instaVeritaResponse.VehicleAge = instaVeritaResponseModel.VehicleAge;
+            instaVeritaResponse.BlacklistedDetails = new List<BlackListDetails>();
+            if (instaVeritaResponseModel.BlacklistedDetails.Count > 0)
             {
-                instaVeritaResponse.Blacklisted = (instaVeritaResponseModel.Blacklisted.ToString() is not "" and not "NA") ? Convert.ToBoolean(instaVeritaResponseModel.Blacklisted.ToString()) : null;
-                instaVeritaResponse.BlacklistedReason = instaVeritaResponseModel.BlacklistedReason;
-                instaVeritaResponse.ChassisNumber = instaVeritaResponseModel.ChassisNumber;
-                instaVeritaResponse.EngineNumber = instaVeritaResponseModel.EngineNumber;
-                instaVeritaResponse.ExpiryDate = (instaVeritaResponseModel.ExpiryDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(instaVeritaResponseModel.ExpiryDate.ToString()) : null;
-                instaVeritaResponse.FitnessCertificateExpiryDate = (instaVeritaResponseModel.FitnessCertificateExpiryDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(instaVeritaResponseModel.FitnessCertificateExpiryDate.ToString()) : null;
-                instaVeritaResponse.FinancingAuthority = instaVeritaResponseModel.FinancingAuthority;
-                instaVeritaResponse.FuelType = instaVeritaResponseModel.FuelType;
-                instaVeritaResponse.MVTaxPaidUpto = instaVeritaResponseModel.MVTaxPaidUpto;
-                instaVeritaResponse.MVTaxStructure = instaVeritaResponseModel.MVTaxStructure;
-                instaVeritaResponse.OwnersName = instaVeritaResponseModel.OwnersName;
-                instaVeritaResponse.OwnerSerialNumber = instaVeritaResponseModel.OwnerSerialNumber;
-                instaVeritaResponse.PuccUpto = instaVeritaResponseModel.PuccUpto;
-                instaVeritaResponse.RegistrationNumber = instaVeritaResponseModel.RegistrationNumber;
-                instaVeritaResponse.RegistrationDate = (instaVeritaResponseModel.RegistrationDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(instaVeritaResponseModel.RegistrationDate.ToString()) : null;
-                instaVeritaResponse.RegisteringAuthority = instaVeritaResponseModel.RegisteringAuthority;
-                instaVeritaResponse.RegistrationState = instaVeritaResponseModel.RegistrationState;
-                instaVeritaResponse.VehicleCompany = instaVeritaResponseModel.VehicleCompany;
-                instaVeritaResponse.VehicleModel = instaVeritaResponseModel.VehicleModel;
-                instaVeritaResponse.VehicleType = instaVeritaResponseModel.VehicleType;
-                instaVeritaResponse.VehicleAge = instaVeritaResponseModel.VehicleAge;
-                instaVeritaResponse.BlacklistedDetails = new List<BlackListDetails>();
-                if (instaVeritaResponseModel.BlacklistedDetails.Count > 0)
+                foreach (var blackListedData in instaVeritaResponseModel.BlacklistedDetails)
                 {
-                    foreach (var blackListedData in instaVeritaResponseModel.BlacklistedDetails)
-                    {
-                        BlackListDetails blackListDetails = new BlackListDetails();
-                        blackListDetails.RegistrationState = blackListedData.RegistrationState;
-                        blackListDetails.RegisteringAuthority = blackListedData.RegisteringAuthority;
-                        blackListDetails.RcNumber = blackListedData.RcNumber;
-                        blackListDetails.FirNumber = blackListedData.FirNumber;
-                        blackListDetails.FirDate = (blackListedData.FirDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(blackListedData.FirDate.ToString()) : null;
-                        blackListDetails.BlacklistedReason = blackListedData.BlacklistedReason;
-                        blackListDetails.BlacklistedDate = (blackListedData.BlacklistedDate.ToString() is not "" and not "NA") ? Convert.ToDateTime(blackListedData.BlacklistedDate.ToString()) : null;
-                        instaVeritaResponse.BlacklistedDetails.Add(blackListDetails);
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (instaVeritaResponseModel != null)
-            {
-                instaVeritaResponse.Blacklisted = !(instaVeritaResponseModel.Blacklisted is String && (string.IsNullOrEmpty(instaVeritaResponseModel.Blacklisted) || Convert.ToString(instaVeritaResponseModel.Blacklisted) == "NA")) ? Convert.ToBoolean(instaVeritaResponseModel.Blacklisted) : null;
-                instaVeritaResponse.BlacklistedReason = instaVeritaResponseModel.BlacklistedReason;
-                instaVeritaResponse.ChassisNumber = instaVeritaResponseModel.ChassisNumber;
-                instaVeritaResponse.EngineNumber = instaVeritaResponseModel.EngineNumber;
-                instaVeritaResponse.ExpiryDate = !(instaVeritaResponseModel.ExpiryDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.ExpiryDate) || Convert.ToString(instaVeritaResponseModel.ExpiryDate) == "NA")) ? (instaVeritaResponseModel.ExpiryDate != null ? Convert.ToDateTime(instaVeritaResponseModel.ExpiryDate) : null) : null;
-                instaVeritaResponse.FitnessCertificateExpiryDate = !(instaVeritaResponseModel.FitnessCertificateExpiryDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.FitnessCertificateExpiryDate) || Convert.ToString(instaVeritaResponseModel.FitnessCertificateExpiryDate) == "NA")) ? (instaVeritaResponseModel.FitnessCertificateExpiryDate != null ? Convert.ToDateTime(instaVeritaResponseModel.FitnessCertificateExpiryDate) : null) : null;
-                instaVeritaResponse.FinancingAuthority = instaVeritaResponseModel.FinancingAuthority;
-                instaVeritaResponse.FuelType = instaVeritaResponseModel.FuelType;
-                instaVeritaResponse.MVTaxPaidUpto = instaVeritaResponseModel.MVTaxPaidUpto;
-                instaVeritaResponse.MVTaxStructure = instaVeritaResponseModel.MVTaxStructure;
-                instaVeritaResponse.OwnersName = instaVeritaResponseModel.OwnersName;
-                instaVeritaResponse.OwnerSerialNumber = instaVeritaResponseModel.OwnerSerialNumber;
-                instaVeritaResponse.PuccUpto = instaVeritaResponseModel.PuccUpto;
-                instaVeritaResponse.RegistrationNumber = instaVeritaResponseModel.RegistrationNumber;
-                instaVeritaResponse.RegistrationDate = !(instaVeritaResponseModel.RegistrationDate is String && (string.IsNullOrEmpty(instaVeritaResponseModel.RegistrationDate) || Convert.ToString(instaVeritaResponseModel.RegistrationDate) == "NA")) ? (instaVeritaResponseModel.RegistrationDate != null ? Convert.ToDateTime(instaVeritaResponseModel.RegistrationDate) : null) : null;
-                instaVeritaResponse.RegisteringAuthority = instaVeritaResponseModel.RegisteringAuthority;
-                instaVeritaResponse.RegistrationState = instaVeritaResponseModel.RegistrationState;
-                instaVeritaResponse.VehicleCompany = instaVeritaResponseModel.VehicleCompany;
-                instaVeritaResponse.VehicleModel = instaVeritaResponseModel.VehicleModel;
-                instaVeritaResponse.VehicleType = instaVeritaResponseModel.VehicleType;
-                instaVeritaResponse.VehicleAge = instaVeritaResponseModel.VehicleAge;
-                instaVeritaResponse.BlacklistedDetails = new List<BlackListDetails>();
-                if (instaVeritaResponseModel.BlacklistedDetails.Count > 0)
-                {
-                    foreach (var blackListedData in instaVeritaResponseModel.BlacklistedDetails)
-                    {
-                        BlackListDetails blackListDetails = new BlackListDetails();
-                        blackListDetails.RegistrationState = blackListedData.RegistrationState;
-                        blackListDetails.RegisteringAuthority = blackListedData.RegisteringAuthority;
-                        blackListDetails.RcNumber = blackListedData.RcNumber;
-                        blackListDetails.FirNumber = blackListedData.FirNumber;
-                        blackListDetails.FirDate = !(blackListedData.FirDate is String && (string.IsNullOrEmpty(blackListedData.FirDate) || Convert.ToString(blackListedData.FirDate) == "NA")) ? (blackListedData.FirDate != null ? Convert.ToDateTime(blackListedData.FirDate) : null) : null;
-                        blackListDetails.BlacklistedReason = blackListedData.BlacklistedReason;
-                        blackListDetails.BlacklistedDate = !(blackListedData.BlacklistedDate is String && (string.IsNullOrEmpty(blackListedData.BlacklistedDate) || Convert.ToString(blackListedData.BlacklistedDate) == "NA")) ? (blackListedData.BlacklistedDate != null ? Convert.ToDateTime(blackListedData.BlacklistedDate) : null) : null;
-                        instaVeritaResponse.BlacklistedDetails.Add(blackListDetails);
-                    }
+                    BlackListDetails blackListDetails = new BlackListDetails();
+                    blackListDetails.RegistrationState = blackListedData.RegistrationState;
+                    blackListDetails.RegisteringAuthority = blackListedData.RegisteringAuthority;
+                    blackListDetails.RcNumber = blackListedData.RcNumber;
+                    blackListDetails.FirNumber = blackListedData.FirNumber;
+                    blackListDetails.FirDate = !(blackListedData.FirDate is String && (string.IsNullOrEmpty(blackListedData.FirDate) || Convert.ToString(blackListedData.FirDate) == "NA")) ? (blackListedData.FirDate != null ? Convert.ToDateTime(blackListedData.FirDate) : null) : null;
+                    blackListDetails.BlacklistedReason = blackListedData.BlacklistedReason;
+                    blackListDetails.BlacklistedDate = !(blackListedData.BlacklistedDate is String && (string.IsNullOrEmpty(blackListedData.BlacklistedDate) || Convert.ToString(blackListedData.BlacklistedDate) == "NA")) ? (blackListedData.BlacklistedDate != null ? Convert.ToDateTime(blackListedData.BlacklistedDate) : null) : null;
+                    instaVeritaResponse.BlacklistedDetails.Add(blackListDetails);
                 }
             }
         }
 
-        
 
         return instaVeritaResponse;
     }

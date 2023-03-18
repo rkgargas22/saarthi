@@ -35,7 +35,7 @@ public class AgentRepository : IAgentRepository
                 AgentDashBoardResponseModel agentDashBoardResponse = new AgentDashBoardResponseModel();
                 agentDashBoardResponse.FleedId = Convert.ToString(dt.Rows[i]["FleetID"])??"";
                 agentDashBoardResponse.CustomerName = dt.Rows[i]["CustomerName"] == DBNull.Value ? "" : (string)dt.Rows[i]["CustomerName"];
-                agentDashBoardResponse.AssignedDateTime = Convert.ToDateTime(dt.Rows[i]["CreatedDate"]);
+                agentDashBoardResponse.AssignedDateTime = Convert.ToDateTime(dt.Rows[i]["AssignedDateTime"]);
                 agentDashBoardResponse.ExpiryDate = Convert.ToDateTime(dt.Rows[i]["ExpiryDate"]);
                 agentDashBoardResponse.CaseApplicationStatus = dt.Rows[i]["CaseApplicationStatus"] == DBNull.Value ? "" : (string)dt.Rows[i]["CaseApplicationStatus"];
                 agentDashBoardResponse.Status = dt.Rows[i]["Status"] == DBNull.Value ? "" : (string)dt.Rows[i]["Status"];
@@ -98,7 +98,7 @@ public class AgentRepository : IAgentRepository
         AgentCustomerResponseModel agentCustomerResponseModel = new AgentCustomerResponseModel();
         if (dt.Rows.Count > 0)
         {
-            agentCustomerResponseModel.FleedId = (long)dt.Rows[0]["FleetID"];
+            agentCustomerResponseModel.FleetId = (long)dt.Rows[0]["FleetID"];
             agentCustomerResponseModel.FanNo = dt.Rows[0]["FanNo"] == DBNull.Value ? "" : (string)dt.Rows[0]["FanNo"];
             agentCustomerResponseModel.PanNo = dt.Rows[0]["PanNo"] == DBNull.Value ? "" : (string)dt.Rows[0]["PanNo"];
             agentCustomerResponseModel.MobileNo = dt.Rows[0]["MobileNo"] == DBNull.Value ? "" : (string)dt.Rows[0]["MobileNo"];
@@ -150,6 +150,7 @@ public class AgentRepository : IAgentRepository
             {
                 AgentRejectedFleetResponseModel agentRejectedFleetResponse = new AgentRejectedFleetResponseModel();
                 agentRejectedFleetResponse.FleetId = (long)dt.Rows[i]["FleetID"];
+                agentRejectedFleetResponse.VehicleID = (long)dt.Rows[i]["VehicleID"];
                 agentRejectedFleetResponse.RcNo = dt.Rows[i]["RCNo"] == DBNull.Value ? "" : (string)dt.Rows[i]["RCNo"];
                 agentRejectedFleetResponse.OwnerName = dt.Rows[i]["OwnerName"] == DBNull.Value ? "" : (string)dt.Rows[i]["OwnerName"];
                 agentRejectedFleetResponse.RegistrationDate = dt.Rows[i]["RegistrationDate"] == DBNull.Value ?  null : Convert.ToDateTime(dt.Rows[i]["RegistrationDate"]);
@@ -176,6 +177,7 @@ public class AgentRepository : IAgentRepository
             {
                 AgentApprovedFleetResponseModel agentApprovedFleetResponse = new AgentApprovedFleetResponseModel();
                 agentApprovedFleetResponse.FleetId = (long)dt.Rows[i]["FleetID"];
+                agentApprovedFleetResponse.VehicleID = (long)dt.Rows[i]["VehicleID"];
                 agentApprovedFleetResponse.RcNo = dt.Rows[i]["RCNo"] == DBNull.Value ? "" : (string)dt.Rows[i]["RCNo"];
                 agentApprovedFleetResponse.OwnerName = dt.Rows[i]["OwnerName"] == DBNull.Value ? "" : (string)dt.Rows[i]["OwnerName"];
                 agentApprovedFleetResponse.RegistrationDate = dt.Rows[i]["RegistrationDate"] == DBNull.Value ? null : Convert.ToDateTime(dt.Rows[i]["RegistrationDate"]);
@@ -277,7 +279,7 @@ public class AgentRepository : IAgentRepository
         AgentCustomerResponseModel agentCustomerResponseModel = new AgentCustomerResponseModel();
         if (dt.Rows.Count > 0)
         {
-            agentCustomerResponseModel.FleedId = (long)dt.Rows[0]["FleetID"];
+            agentCustomerResponseModel.FleetId = (long)dt.Rows[0]["FleetID"];
             agentCustomerResponseModel.FanNo = dt.Rows[0]["FanNo"] == DBNull.Value ? "" : (string)dt.Rows[0]["FanNo"];
             agentCustomerResponseModel.PanNo = dt.Rows[0]["PanNo"] == DBNull.Value ? "" : (string)dt.Rows[0]["PanNo"];
             agentCustomerResponseModel.MobileNo = dt.Rows[0]["MobileNo"] == DBNull.Value ? "" : (string)dt.Rows[0]["MobileNo"];
@@ -288,5 +290,27 @@ public class AgentRepository : IAgentRepository
             agentCustomerResponseModel.Comment = dt.Rows[0]["Comment"] != DBNull.Value ? (string)dt.Rows[0]["Comment"] : "";
         }
         return agentCustomerResponseModel;
+    }
+
+    public async Task<List<AgentListDataResponseModel>> GetAgentLists(AgentListDataRequestModel agentListDataRequestModel)
+    {
+        List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("UserType", agentListDataRequestModel.UserType),
+            new SqlParameter("AgentId", agentListDataRequestModel.AgentId)
+        };
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_getEmployeeList", parameters);
+        List<AgentListDataResponseModel> agentListDataResponseModels = new List<AgentListDataResponseModel>();
+        if (dt.Rows.Count > 0)
+        {
+            for(int i = 0; i < dt.Rows.Count; i++)
+            {
+                AgentListDataResponseModel agentListDataResponseModel = new AgentListDataResponseModel();
+                agentListDataResponseModel.EmpId = (long)dt.Rows[i]["EmpId"];
+                agentListDataResponseModel.EmpName = (string)dt.Rows[i]["EmpName"];
+                agentListDataResponseModels.Add(agentListDataResponseModel);
+            }
+        }
+        return agentListDataResponseModels;
     }
 }

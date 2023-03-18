@@ -2,13 +2,15 @@
 
 namespace Tmf.Saarthi.Api.Validators.Document;
 
-public class DocumentUploadValidator : AbstractValidator<DocumentRequest>
+public class DocumentUploadValidator : AbstractValidator<UploadDocumentsRequest>
 {
     public DocumentUploadValidator()
     {
-        RuleFor(x => x.FleetId).NotEmpty().WithMessage(ValidationMessages.FleetId);
-        RuleFor(x => x.CreatedBy).NotEmpty().WithMessage(ValidationMessages.CreatedBy);
-        RuleFor(x => x.Documenttype).NotEmpty().WithMessage(ValidationMessages.Documenttype);
-        RuleFor(x => x.DocumentUpload).NotEmpty().WithMessage(ValidationMessages.DocumentUpload);
+        RuleFor(x => x.FleetId).NotEmpty().WithMessage(ValidationMessages.FleetId);       
+        RuleFor(x => x.DocTypeId).NotEmpty().WithMessage(ValidationMessages.DocumentType);
+        RuleFor(x => x.StageId).NotEmpty().WithMessage(ValidationMessages.StageType);
+        RuleFor(x => x.Extension).NotEmpty().WithMessage(ValidationMessages.ExtensionType); 
+        RuleFor(x => x.DocumentName).NotEmpty().WithMessage(ValidationMessages.ExtensionType);
+        RuleFor(x => x.DocumentData).NotEmpty().WithMessage(ValidationMessages.DocumentUpload);
     }
 }

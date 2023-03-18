@@ -1,4 +1,5 @@
-﻿using Tmf.Saarthi.Core.RequestModels.Agent;
+﻿using Microsoft.AspNetCore.Mvc;
+using Tmf.Saarthi.Core.RequestModels.Agent;
 using Tmf.Saarthi.Core.ResponseModels.Agent;
 
 namespace Tmf.Saarthi.Api.Controllers;
@@ -10,11 +11,15 @@ public class AgentController : ControllerBase
     private readonly IAgentManager _agentManager;
     private readonly IValidator<AgentSalesDeviationRequest> _agentSalesDeviationRequestValidator;
     private readonly IValidator<AssignFleetRequest> _assignFleetValidator;
-    public AgentController(IAgentManager agentManager, IValidator<AgentSalesDeviationRequest> agentSalesDeviationRequestValidator, IValidator<AssignFleetRequest> assignFleetValidator)
+    private readonly IValidator<AgentListDataRequest> _agentListDataValidator;
+    private readonly IValidator<SendOtpToCustomerRequest> _sendOtpToCustomerValidator;
+    public AgentController(IAgentManager agentManager, IValidator<AgentSalesDeviationRequest> agentSalesDeviationRequestValidator, IValidator<AssignFleetRequest> assignFleetValidator, IValidator<AgentListDataRequest> agentListDataValidator, IValidator<SendOtpToCustomerRequest> sendOtpToCustomerValidator)
     {
         _agentManager = agentManager;
         _agentSalesDeviationRequestValidator = agentSalesDeviationRequestValidator;
         _assignFleetValidator = assignFleetValidator;
+        _agentListDataValidator = agentListDataValidator;
+        _sendOtpToCustomerValidator = sendOtpToCustomerValidator;
     }
 
     [HttpGet("dashBoardData/{agentId}")]
@@ -106,7 +111,7 @@ public class AgentController : ControllerBase
     [ProducesDefaultResponseType(typeof(AgentSalesDeviationUpdateResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(AgentSalesDeviationUpdateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateSalesDeviation([FromRoute] long FleetID ,[FromBody] AgentSalesDeviationRequest agentSalesDeviationRequest)
+    public async Task<IActionResult> UpdateSalesDeviation([FromRoute] long FleetID, [FromBody] AgentSalesDeviationRequest agentSalesDeviationRequest)
     {
         ValidationResult validationResult = await _agentSalesDeviationRequestValidator.ValidateAsync(agentSalesDeviationRequest);
         if (!validationResult.IsValid)
@@ -145,7 +150,7 @@ public class AgentController : ControllerBase
             return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
         }
         AssignFleetResponse assignFleetResponse = await _agentManager.AssignFleet(assignFleetRequest);
-        if(assignFleetResponse != null && string.IsNullOrEmpty(assignFleetResponse.Message)) 
+        if (assignFleetResponse != null && string.IsNullOrEmpty(assignFleetResponse.Message))
         {
             return BadRequest(new ErrorResponse { Message = ValidationMessages.UpdateFailed, Error = ValidationMessages.IdNotFound });
         }
@@ -156,7 +161,7 @@ public class AgentController : ControllerBase
     [HttpGet("GetCustomerData/{FleetID}")]
     [ProducesDefaultResponseType(typeof(AgentCustomerResponse))]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(AssignFleetResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AgentCustomerResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerDetails([FromRoute] long FleetID)
     {
         AgentCustomerResponse agentCustomerResponse = await _agentManager.GetAgentCustomerDataByFleetID(FleetID);
@@ -167,5 +172,55 @@ public class AgentController : ControllerBase
 
         return Ok(agentCustomerResponse);
     }
+
+
+    [HttpGet("GetAgentListData")]
+    [ProducesDefaultResponseType(typeof(List<AgentListDataResponse>))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(List<AgentListDataResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAgentListData([FromQuery] AgentListDataRequest agentListDataRequest)
+    {
+        ValidationResult validationResult = await _agentListDataValidator.ValidateAsync(agentListDataRequest);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
+        }
+        List<AgentListDataResponse> agentListDataResponses = await _agentManager.GetAgentLists(agentListDataRequest);
+        if (agentListDataResponses != null && agentListDataResponses.Count() == 0)
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.DataNotAvailable, Error = "Error Occurred" });
+        }
+
+        return Ok(agentListDataResponses);
+    }
+
+    [HttpPost("SendOtpToCustomer")]
+    [ProducesDefaultResponseType(typeof(SendOtpToCustomerResponse))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(SendOtpToCustomerResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> SendOtpToCustomer([FromBody] SendOtpToCustomerRequest sendOtpToCustomerRequest)
+    {
+        ValidationResult validationResult = await _sendOtpToCustomerValidator.ValidateAsync(sendOtpToCustomerRequest);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = validationResult.Errors.Select(m => m.ErrorMessage) });
+        }
+        SendOtpToCustomerResponse sendOtpToCustomerResponse = await _agentManager.SendOtpToCustomer(sendOtpToCustomerRequest);
+
+        return CreatedAtAction(nameof(SendOtpToCustomer), null, sendOtpToCustomerResponse);
+    }
+
+    //[HttpGet("GetOtpKeyData")]
+    //[ProducesDefaultResponseType(typeof(SendOtpToCustomerResponse))]
+    //[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    //[ProducesResponseType(typeof(SendOtpToCustomerResponse), StatusCodes.Status200OK)]
+    //public async Task<IActionResult> GetOtpKeyData([FromQuery] string key)
+    //{
+    //    if (string.IsNullOrEmpty(key))
+    //    {
+    //        return BadRequest(new ErrorResponse { Message = ValidationMessages.GeneralValidationErrorMessage, Error = "" });
+    //    }
+
+    //}
 
 }

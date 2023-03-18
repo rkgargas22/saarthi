@@ -1,25 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Tmf.Saarthi.Core.RequestModels.Document;
 
 public class DocumentRequest
 {
-    [JsonPropertyName("FleetId")]
-    public int FleetId { get; set; }
+    [JsonPropertyName("fleetId")]
+    public long FleetId { get; set; }
 
-    [JsonPropertyName("DocumentUrl")]
-    public string DocumentUrl { get; set; } = string.Empty;
+    [JsonPropertyName("docTypeId")]
+    public int DocTypeId { get; set; }
 
-    [JsonPropertyName("CreatedBy")]
-    public string CreatedBy { get; set; } = string.Empty;
+    [JsonPropertyName("stageId")]
+    public int StageId { get; set; }
 
-    [JsonPropertyName("IsActive")]
-    public Boolean IsActive { get; set; }
+    [JsonPropertyName("extension")]
+    public string Extension { get; set; } = string.Empty;
 
-    [JsonPropertyName("Documenttype")]
-    public string Documenttype { get; set; } = string.Empty;
+    [JsonPropertyName("documentName")]
+    public string DocumentName { get; set; } = string.Empty;
 
-    [JsonPropertyName("DocumentUpload")]
-    public IFormFile DocumentUpload { get; set; }
+    [JsonPropertyName("entityCode")]
+    public string EntityCode { get; set; } = string.Empty;
+
+    [JsonPropertyName("entityId")]
+    public long EntityId { get; set; }
 }

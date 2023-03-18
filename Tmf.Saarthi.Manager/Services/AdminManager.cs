@@ -1,18 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using Tmf.Saarthi.Core.RequestModels.Admin;
-using Tmf.Saarthi.Core.RequestModels.Fleet;
+﻿using Tmf.Saarthi.Core.RequestModels.Admin;
 using Tmf.Saarthi.Core.ResponseModels.Admin;
-using Tmf.Saarthi.Core.ResponseModels.Agent;
-using Tmf.Saarthi.Core.ResponseModels.Fleet;
 using Tmf.Saarthi.Infrastructure.Interfaces;
 using Tmf.Saarthi.Infrastructure.Models.Request.Admin;
-using Tmf.Saarthi.Infrastructure.Models.Request.Fleet;
-using Tmf.Saarthi.Infrastructure.Models.Request.Ocr;
 using Tmf.Saarthi.Infrastructure.Models.Response.Admin;
-using Tmf.Saarthi.Infrastructure.Models.Response.Agent;
-using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
-using Tmf.Saarthi.Infrastructure.Services;
 using Tmf.Saarthi.Manager.Interfaces;
 
 namespace Tmf.Saarthi.Manager.Services
@@ -20,9 +10,9 @@ namespace Tmf.Saarthi.Manager.Services
     public class AdminManager : IAdminManager
     {
         private readonly IAdminRepository _adminRepository;
-        public AdminManager(IAdminRepository aminRepository)
+        public AdminManager(IAdminRepository adminRepository)
         {
-            _adminRepository = aminRepository;
+            _adminRepository = adminRepository;
         }
         public async Task<List<AdminDashbaordResponse>> GetAdminDashbaord()
         {
@@ -52,6 +42,7 @@ namespace Tmf.Saarthi.Manager.Services
             {
                 AdminFleetResponse adminFleetResponse = new AdminFleetResponse();
                 adminFleetResponse.VehicleId = model.VehicleId;
+                adminFleetResponse.FleetID = model.FleetID;
                 adminFleetResponse.RegistrationNo = model.RegistrationNo;
                 adminFleetResponse.OwnerName = model.OwnerName;
                 adminFleetResponse.Year = model.Year;
@@ -151,28 +142,7 @@ namespace Tmf.Saarthi.Manager.Services
         }
 
 
-        public async Task<List<CustomerDataResponse>> GetCustomerData(long fleetId)
-        {
-            List<CustomerDataResponseModel> adminFleetResponseModelList = await _adminRepository.GetCustomerData(fleetId);
-            List<CustomerDataResponse> customerDataResponses = new List<CustomerDataResponse>();
+        
 
-            foreach (CustomerDataResponseModel model in adminFleetResponseModelList)
-            {
-                CustomerDataResponse customerDataResponse = new CustomerDataResponse();
-                customerDataResponse.BPNumber = model.BPNumber;
-                customerDataResponse.FleetID = model.FleetID;
-                customerDataResponse.FirstName = model.FirstName;
-                customerDataResponse.MiddleName = model.MiddleName;
-                customerDataResponse.LastName = model.LastName;
-                customerDataResponse.Dob = model.Dob;
-                customerDataResponse.Gender = model.Gender;
-                customerDataResponse.PanNo = model.PanNo;
-                customerDataResponse.FanNo = model.FanNo;
-                customerDataResponse.MobileNo = model.MobileNo;
-                customerDataResponses.Add(customerDataResponse);
-            }
-
-            return customerDataResponses;
-        }
     }
 }

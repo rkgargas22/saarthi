@@ -52,4 +52,6 @@ public class FleetVehicleResponseModel
     public string BlackListedReason { get; set; } = string.Empty;
     [JsonPropertyName("comment")]
     public string Comment { get; set; } = string.Empty;
+    [JsonPropertyName("errorMessage")]
+    public string ErrorMessage { get; set; } = string.Empty;
 }

@@ -8,11 +8,20 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="FileUploaded\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Templates\CustomerConsent.html" />
+    <None Include="wwwroot\Templates\FuelLoanAgreement.html" />
+    <None Include="wwwroot\Templates\natch.html" />
+    <None Include="wwwroot\Templates\ProvisionalLetter.html" />
+    <None Include="wwwroot\Templates\SanctionLetter.html" />
   </ItemGroup>
 
   <ItemGroup>

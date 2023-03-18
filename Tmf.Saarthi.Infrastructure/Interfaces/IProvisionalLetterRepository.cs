@@ -5,5 +5,6 @@ namespace Tmf.Saarthi.Infrastructure.Interfaces;
 
 public interface IProvisionalLetterRepository
 {
+    Task<DisagreeProvisionalResponseModel> DisagreeProvisionalLetter(DisagreeProvisionalResquestModel disagreeProvisionalResquestModel);
     Task<ProvisionalLetteResponseModel> GenerateprovisionalLetter(ProvisionalLetterRequestModel provisionalLetterRequestModel);
 }
