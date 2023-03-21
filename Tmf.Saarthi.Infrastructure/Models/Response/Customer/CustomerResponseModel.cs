@@ -24,4 +24,6 @@ public class CustomerResponseModel
     public string GroupKey { get; set; } = string.Empty;
     public DateTime LastUpdateDate { get; set; }
     public DateTime Dob { get; set; }
+    public long StageId { get; set; }
+    public string StageCode { get; set; } = string.Empty;
 }

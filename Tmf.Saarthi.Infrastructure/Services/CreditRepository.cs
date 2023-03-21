@@ -46,30 +46,48 @@ namespace Tmf.Saarthi.Infrastructure.Services
         }
 
 
-        public async Task<List<FiDetailResponseModel>> GetFiDetail(long FleetId)
+        public async Task<FiDetailResponseModel> GetFiDetail(long FleetId)
         {
+            string fiDevialtion = string.Empty;
             List<SqlParameter> parameters = new List<SqlParameter>()
             {
             new SqlParameter("FleetId", FleetId)
             };
             DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_getFiDetail", parameters);
-
-            List<FiDetailResponseModel> fiDetailResponseModelList = new List<FiDetailResponseModel>();
+            FiDetailResponseModel fiDetailResponseModel = new FiDetailResponseModel();
             if (dt.Rows.Count > 0)
             {
-                for (int i = 0; i < dt.Rows.Count; i++)
+                fiDetailResponseModel.FleetID = dt.Rows[0]["FleetID"] == DBNull.Value ? 0 : (Int64)dt.Rows[0]["FleetID"];
+                fiDetailResponseModel.VerificationDate = dt.Rows[0]["VerificationDate"] == DBNull.Value ? "" : (string)dt.Rows[0]["VerificationDate"];
+                fiDetailResponseModel.FiStatus = dt.Rows[0]["FiStatus"] == DBNull.Value ? "" : (string)dt.Rows[0]["FiStatus"];
+                fiDetailResponseModel.CPCStatus = dt.Rows[0]["CPCStatus"] == DBNull.Value ? "" : (string)dt.Rows[0]["CPCStatus"];
+                fiDevialtion = dt.Rows[0]["DeviationIds"] == DBNull.Value ? "" : (string)dt.Rows[0]["DeviationIds"];
+
+                if (!string.IsNullOrEmpty(fiDevialtion))
                 {
-                    FiDetailResponseModel fiDetailResponseModel = new FiDetailResponseModel();
-                    fiDetailResponseModel.FleetID = dt.Rows[i]["FleetID"] == DBNull.Value ? 0 : (Int64)dt.Rows[i]["FleetID"];
-                    fiDetailResponseModel.VerificationDate = dt.Rows[i]["VerificationDate"] == DBNull.Value ? "" : (string)dt.Rows[i]["VerificationDate"];
-                    fiDetailResponseModel.FiStatus = dt.Rows[i]["FiStatus"] == DBNull.Value ? "" : (string)dt.Rows[i]["FiStatus"];
-                    fiDetailResponseModel.CPCStatus = dt.Rows[i]["CPCStatus"] == DBNull.Value ? "" : (string)dt.Rows[i]["CPCStatus"];
-                    fiDetailResponseModel.FiDeviation = dt.Rows[i]["FiDeviation"] == DBNull.Value ? "" : (string)dt.Rows[i]["FiDeviation"];
-                    fiDetailResponseModelList.Add(fiDetailResponseModel);
+                    string temp = string.Empty;
+                    string[] values = fiDevialtion.Split(',');
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        List<SqlParameter> parameters1 = new List<SqlParameter>()
+                    {
+                        new SqlParameter("DeviationId",Convert.ToInt64(values[i]))
+                    };
+                        DataTable dt1 = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_getFiDeviationDetail", parameters1);
+                        if (dt1.Rows.Count > 0)
+                        {
+                            temp += dt1.Rows[0]["Deviations"] == DBNull.Value ? "" : (string)dt1.Rows[0]["Deviations"];
+                            if (i + 1 < values.Length)
+                            {
+                                temp += ", ";
+                            }
+                        }
+                    }
+                    fiDetailResponseModel.fiDeviations = temp;
                 }
             }
 
-            return fiDetailResponseModelList;
+            return fiDetailResponseModel;
         }
 
         public async Task<FiDetailResponseModel> UpdateFiDetail(UpdateFiDetailRequestModel updateFiDetailRequestModel)
@@ -92,5 +110,24 @@ namespace Tmf.Saarthi.Infrastructure.Services
             return fiDetailResponseModel;
         }
 
+
+        public async Task<FiDetailResponseModel> FIRetrigger(FiRetriggerRequestModel fiRetriggerRequestModel)
+        {
+            List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("FleetId", fiRetriggerRequestModel.fleetId),
+            new SqlParameter("UpdateBy", fiRetriggerRequestModel.UserId),
+        };
+
+            DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "usp_FiRetrigger", parameters);
+
+            FiDetailResponseModel fiDetailResponseModel = new FiDetailResponseModel();
+            if (dt.Rows.Count > 0)
+            {
+                fiDetailResponseModel.FleetID = Convert.ToInt64(dt.Rows[0]["FleetID"]);
+            }
+
+            return fiDetailResponseModel;
+        }
     }
 }

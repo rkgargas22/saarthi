@@ -17,7 +17,7 @@ namespace Tmf.Saarthi.Core.ResponseModels.Credit
         public string CPCStatus { get; set; } = string.Empty;
 
         [JsonPropertyName("FiDeviation")]
-        public string FiDeviation { get; set; } = string.Empty;
+        public string fiDeviations { get; set; } 
 
     }
 }

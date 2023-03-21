@@ -124,6 +124,8 @@ public class CustomerRepository : ICustomerRepository
             customerResponse.Dob = (DateTime)dt.Rows[0]["Dob"];
             customerResponse.PanNo = dt.Rows[0]["PanNo"] != DBNull.Value ? (string)dt.Rows[0]["PanNo"] : string.Empty;
             customerResponse.CustomerType = dt.Rows[0]["CustomerType"] != DBNull.Value ? (string)dt.Rows[0]["CustomerType"] : string.Empty;
+            customerResponse.StageId = dt.Rows[0]["StageId"] != DBNull.Value ? (int)dt.Rows[0]["StageId"] : 0;
+            customerResponse.StageCode = dt.Rows[0]["StageCode"] != DBNull.Value ? (string)dt.Rows[0]["StageCode"] : string.Empty;
         }
 
         return customerResponse;

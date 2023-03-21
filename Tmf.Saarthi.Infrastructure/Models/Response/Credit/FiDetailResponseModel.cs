@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Tmf.Saarthi.Infrastructure.Models.Response.Credit
 {
@@ -17,7 +18,7 @@ namespace Tmf.Saarthi.Infrastructure.Models.Response.Credit
         public string CPCStatus { get; set; } = string.Empty;
 
         [JsonPropertyName("FiDeviation")]
-        public string FiDeviation { get; set; } = string.Empty;
+        public string fiDeviations { get; set; }
 
     }
 }

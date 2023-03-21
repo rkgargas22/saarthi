@@ -24,10 +24,10 @@ namespace Tmf.Saarthi.Api.Controllers
 
         [HttpGet("FiDetails/{FleetId}")]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(List<FiDetailResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FiDetailResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetFiDetail([FromRoute] long FleetId)
         {
-            List<FiDetailResponse> fiDetailResponse = await _creditManager.GetFiDetail(FleetId);
+            FiDetailResponse fiDetailResponse = await _creditManager.GetFiDetail(FleetId);
             return Ok(fiDetailResponse);
         }
 
@@ -41,6 +41,18 @@ namespace Tmf.Saarthi.Api.Controllers
             UpdateFiDetailResponse updateFiDetailResponse = await _creditManager.UpdateFiDetail(FleetID, adminFleetDeviationRequest);
 
             return Ok(updateFiDetailResponse);
+        }
+
+        [HttpPatch]
+        [Route("FIRetrigger")]
+        [ProducesDefaultResponseType(typeof(FiDetailResponse))]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(FiDetailResponse), StatusCodes.Status201Created)]
+        public async Task<IActionResult> FIRetrigger([FromBody] FiRetriggerRequest fiRetriggerRequest)
+        {
+            FiRetriggerResponse fiRetriggerResponse = await _creditManager.FIRetrigger(fiRetriggerRequest);
+
+            return Ok(fiRetriggerResponse);
         }
     }
 }

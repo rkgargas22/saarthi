@@ -30,4 +30,6 @@ public interface IAgentManager
     Task<List<AgentListDataResponse>> GetAgentLists(AgentListDataRequest agentListDataRequest);
 
     Task<SendOtpToCustomerResponse> SendOtpToCustomer(SendOtpToCustomerRequest sendOtpToCustomerRequest);
+
+    Task<SendToDeviationAgentResponse> SendToDeviationAgentVehicle(SendToDeviationAgentRequest sendToDeviationAgentRequest);
 }

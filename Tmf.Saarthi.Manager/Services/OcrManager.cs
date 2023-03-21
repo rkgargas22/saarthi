@@ -18,12 +18,12 @@ public class OcrManager : IOcrManager
 
     public async Task<AddressDetailsResponse> GetAddressDetails(AddressDetailsRequest getAddressDetailsRequest)
     {
-       // bool isValidDoc = await ValidateDocument(getAddressDetailsRequest);
+         bool isValidDoc = await ValidateDocument(getAddressDetailsRequest);
         AddressDetailsResponse getAddressDetailsResponse = new AddressDetailsResponse();
 
-        if (true)
+        if (isValidDoc)
         {
-            if (getAddressDetailsRequest.DocumentType == (int)OCRDocuments.Aadhar)
+            if (getAddressDetailsRequest.DocumentType == (int)OCRDocuments.aadhar)
             {
                 AadharExtractResponseModel aadharExtractResponseModel = await AadharExtract(getAddressDetailsRequest);
                 if (aadharExtractResponseModel != null && aadharExtractResponseModel.Status == "completed")
@@ -48,7 +48,7 @@ public class OcrManager : IOcrManager
                     }
                 }
             }
-            else if (getAddressDetailsRequest.DocumentType == (int)OCRDocuments.DrivingLicence)
+            else if (getAddressDetailsRequest.DocumentType == (int)OCRDocuments.drivinglicence)
             {
                 DLExtractResponseModel dLExtractResponseModel = await DLExtract(getAddressDetailsRequest);
                 if (dLExtractResponseModel != null && dLExtractResponseModel.Status == "completed")
@@ -64,7 +64,7 @@ public class OcrManager : IOcrManager
                     }
                 }
             }
-            else if (getAddressDetailsRequest.DocumentType == (int)OCRDocuments.VoterId)
+            else if (getAddressDetailsRequest.DocumentType == (int)OCRDocuments.voterId)
             {
                 VoterIdExtractResponseModel voterIdExtractResponseModel = await VoterIdExtract(getAddressDetailsRequest);
                 if (voterIdExtractResponseModel != null && voterIdExtractResponseModel.Status == "completed")
@@ -97,7 +97,7 @@ public class OcrManager : IOcrManager
 
         validateDocumentRequestModel.Data = new Data();
         validateDocumentRequestModel.Data.Document1 = getAddressDetailsRequest.FrontPage;
-        validateDocumentRequestModel.Data.DocType = getAddressDetailsRequest.DocumentType;
+        validateDocumentRequestModel.Data.DocType = getAddressDetailsRequest.DocumentType == 154 ? "aadhar" : (getAddressDetailsRequest.DocumentType == 56 ? "drivinglicence" : "voterId");
         validateDocumentRequestModel.Data.AdvancedFeatures = new AdvancedFeatures();
         validateDocumentRequestModel.Data.AdvancedFeatures.DetectDocSide = true;
 
@@ -166,7 +166,7 @@ public class OcrManager : IOcrManager
         voterIdExtractRequestModel.TaskId = getAddressDetailsRequest.FleetID.ToString();
         voterIdExtractRequestModel.Data = new DataVoterId();
         voterIdExtractRequestModel.Data.Document1 = getAddressDetailsRequest.FrontPage;
-
+        voterIdExtractRequestModel.Data.Document2 = getAddressDetailsRequest.BackPage;
         VoterIdExtractResponseModel voterIdExtractResponseModel = await _ocrRepository.VoterIdExtract(voterIdExtractRequestModel);
 
         return voterIdExtractResponseModel;

@@ -64,6 +64,8 @@ public class LoginRepository : ILoginRepository
             loginResponseModel.Dob = (DateTime)dt.Rows[0]["Dob"];
             loginResponseModel.PanNo = dt.Rows[0]["PanNo"] != DBNull.Value ? (string)dt.Rows[0]["PanNo"] : string.Empty;
             loginResponseModel.CustomerType = dt.Rows[0]["CustomerType"] != DBNull.Value ? (string)dt.Rows[0]["CustomerType"] : string.Empty;
+            loginResponseModel.StageId = dt.Rows[0]["StageId"] != DBNull.Value ? (int)dt.Rows[0]["StageId"] : 0;
+            loginResponseModel.StageCode = dt.Rows[0]["StageCode"] != DBNull.Value ? (string)dt.Rows[0]["StageCode"] : string.Empty;
         }
 
         return loginResponseModel;

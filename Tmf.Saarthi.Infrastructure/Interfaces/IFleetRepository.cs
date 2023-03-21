@@ -1,4 +1,6 @@
-﻿using Tmf.Saarthi.Core.ResponseModels.Fleet;
+﻿using System.Data;
+using Tmf.Saarthi.Core.ResponseModels.Fleet;
+using Tmf.Saarthi.Infrastructure.Models.Request;
 using Tmf.Saarthi.Infrastructure.Models.Request.Fleet;
 using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
 
@@ -35,4 +37,6 @@ public interface IFleetRepository
     Task<List<GetDepartmentListResponseModel>> GetDepartmentLists(GetDepartmentListRequestModel getDepartmentListRequestModel);
 
     Task<List<GetAdditionalInfoResponseModel>> GetAdditionalInfos(GetAdditionalInfoRequestModel getAdditionalInfoRequestModel);
+
+    Task<AddDeviationStageResponseModel> SaveDeviationStageInFleet(AddDeviationStageRequestModel addDeviationStageRequestModel);
 }

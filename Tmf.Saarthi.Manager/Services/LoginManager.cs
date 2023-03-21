@@ -35,6 +35,8 @@ public class LoginManager : ILoginManager
         loginResponse.customerResponse.Status = loginResponseModel.Status;
         loginResponse.customerResponse.PanNo = loginResponseModel.PanNo;
         loginResponse.customerResponse.CustomerType = loginResponseModel.CustomerType;
+        loginResponse.customerResponse.StageId = loginResponseModel.StageId;
+        loginResponse.customerResponse.StageCode = loginResponseModel.StageCode;
 
         return loginResponse;
     }

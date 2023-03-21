@@ -17,12 +17,14 @@ public class AgentManager : IAgentManager
     private readonly IAgentRepository _agentRepository;
     private readonly IOtpManager _otpManager;
     private readonly IEmailManager _emailManager;
+    private readonly IFleetManager _fleetManager;
 
-    public AgentManager(IAgentRepository agentRepository, IOtpManager otpManager, IEmailManager emailManager)
+    public AgentManager(IAgentRepository agentRepository, IOtpManager otpManager, IEmailManager emailManager, IFleetManager fleetManager)
     {
         _agentRepository = agentRepository;
         _otpManager = otpManager;
         _emailManager = emailManager;
+        _fleetManager = fleetManager;
     }
 
     public async Task<List<AgentDashBoardResponse>> GetAgentDashBoardData(long? agentId)
@@ -299,5 +301,12 @@ public class AgentManager : IAgentManager
         }
 
         return sendOtpToCustomerResponse;
+    }
+
+    public async Task<SendToDeviationAgentResponse> SendToDeviationAgentVehicle(SendToDeviationAgentRequest sendToDeviationAgentRequest)
+    {
+        SendToDeviationAgentResponse sendToDeviationAgentResponse = await _fleetManager.SendToDeviationAgent(sendToDeviationAgentRequest, "DEVADM");
+
+        return sendToDeviationAgentResponse;
     }
 }

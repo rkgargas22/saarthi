@@ -2,8 +2,8 @@
 {
     public enum OCRDocuments
     {
-        Aadhar=154,    
-        DrivingLicence=56,   
-        VoterId = 43
+        aadhar = 154,
+        drivinglicence = 56,
+        voterId = 43
     }
 }

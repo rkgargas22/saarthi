@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Tmf.Saarthi.Core.RequestModels.Agent;
+﻿using Tmf.Saarthi.Core.RequestModels.Agent;
 using Tmf.Saarthi.Core.ResponseModels.Agent;
 
 namespace Tmf.Saarthi.Api.Controllers;
@@ -222,5 +221,16 @@ public class AgentController : ControllerBase
     //    }
 
     //}
+
+    [HttpPost("SendToDeviation")]
+    [ProducesDefaultResponseType(typeof(SendToDeviationAgentResponse))]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(SendToDeviationAgentResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> SendToDeviation(SendToDeviationAgentRequest sendToDeviationAgentRequest)
+    {
+        SendToDeviationAgentResponse sendToDeviationAgentResponse = await _agentManager.SendToDeviationAgentVehicle(sendToDeviationAgentRequest);
+
+        return CreatedAtAction(nameof(SendToDeviation), null, sendToDeviationAgentResponse);
+    }
 
 }

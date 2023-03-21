@@ -17,4 +17,6 @@ public class CustomerResponse
     public DateTime Dob { get; set; }
     public string PanNo { get; set; } = string.Empty;
     public string CustomerType { get; set; } = string.Empty;
+    public long StageId { get; set; }
+    public string StageCode { get; set; } = string.Empty;
 }

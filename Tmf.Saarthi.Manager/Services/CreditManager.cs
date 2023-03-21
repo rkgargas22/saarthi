@@ -7,7 +7,7 @@ using Tmf.Saarthi.Manager.Interfaces;
 
 namespace Tmf.Saarthi.Manager.Services
 {
-    public class CreditManager: ICreditManager
+    public class CreditManager : ICreditManager
     {
         private readonly ICreditRepository _creditRepository;
         public CreditManager(ICreditRepository creditRepository)
@@ -32,23 +32,18 @@ namespace Tmf.Saarthi.Manager.Services
 
             return creditDashboardResponses;
         }
-        public async Task<List<FiDetailResponse>> GetFiDetail(long FleetId)
+        public async Task<FiDetailResponse> GetFiDetail(long FleetId)
         {
-            List<FiDetailResponseModel> fiDetailResponseModelList = await _creditRepository.GetFiDetail(FleetId);
-            List<FiDetailResponse> creditDashboardResponses = new List<FiDetailResponse>();
+            FiDetailResponseModel fiDetailResponseModelList = await _creditRepository.GetFiDetail(FleetId);
 
-            foreach (FiDetailResponseModel model in fiDetailResponseModelList)
-            {
-                FiDetailResponse creditDashboardResponse = new FiDetailResponse();
-                creditDashboardResponse.FleetID = model.FleetID;
-                creditDashboardResponse.VerificationDate = model.VerificationDate;
-                creditDashboardResponse.FiStatus = model.FiStatus;
-                creditDashboardResponse.CPCStatus = model.CPCStatus;
-                creditDashboardResponse.FiDeviation = model.FiDeviation;
-                creditDashboardResponses.Add(creditDashboardResponse);
-            }
+            FiDetailResponse fiDetailResponse = new FiDetailResponse();
+            fiDetailResponse.FleetID = fiDetailResponseModelList.FleetID;
+            fiDetailResponse.VerificationDate = fiDetailResponseModelList.VerificationDate;
+            fiDetailResponse.FiStatus = fiDetailResponseModelList.FiStatus;
+            fiDetailResponse.CPCStatus = fiDetailResponseModelList.CPCStatus;
+            fiDetailResponse.fiDeviations = fiDetailResponseModelList.fiDeviations;
 
-            return creditDashboardResponses;
+            return fiDetailResponse;
         }
 
         public async Task<UpdateFiDetailResponse> UpdateFiDetail(long FleetID, UpdateFiDetailRequest updateFiDetailRequest)
@@ -70,6 +65,27 @@ namespace Tmf.Saarthi.Manager.Services
                 updateFiDetailResponse.Message = "Updated Successfully";
             }
             return updateFiDetailResponse;
+        }
+
+
+        public async Task<FiRetriggerResponse> FIRetrigger(FiRetriggerRequest fiRetriggerRequest)
+        {
+            FiRetriggerRequestModel fiRetriggerRequestModel = new FiRetriggerRequestModel();
+            fiRetriggerRequestModel.fleetId = fiRetriggerRequest.fleetId;
+            fiRetriggerRequestModel.UserId = fiRetriggerRequest.UserId;
+
+            FiDetailResponseModel fiDetailResponseModel = await _creditRepository.FIRetrigger(fiRetriggerRequestModel);
+
+            FiRetriggerResponse fiRetriggerResponse = new FiRetriggerResponse();
+            if (fiDetailResponseModel.FleetID == 0)
+            {
+                fiRetriggerResponse.Message = "FI Retrigger Failed, No Fleet Found.";
+            }
+            else
+            {
+                fiRetriggerResponse.Message = "FI Retriggered Successfully";
+            }
+            return fiRetriggerResponse;
         }
     }
 }

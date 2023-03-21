@@ -5,8 +5,9 @@ namespace Tmf.Saarthi.Manager.Interfaces
 {
     public interface ICreditManager
     {
+        Task<FiRetriggerResponse> FIRetrigger(FiRetriggerRequest fiRetriggerRequest);
         Task<List<CreditDashboardResponse>> GetCreditDashboard();
-        Task<List<FiDetailResponse>> GetFiDetail(long FleetId);
+        Task<FiDetailResponse> GetFiDetail(long FleetId);
         Task<UpdateFiDetailResponse> UpdateFiDetail(long FleetID, UpdateFiDetailRequest adminFleetDeviationRequest);
     }
 }

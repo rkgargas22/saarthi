@@ -17,5 +17,7 @@ public class VoterIdExtractRequestModel
 public class DataVoterId
 {
     [JsonPropertyName("document1")] 
-    public string Document1 { get; set; } = string.Empty; 
+    public string Document1 { get; set; } = string.Empty;
+    [JsonPropertyName("document2")]
+    public string Document2 { get; set; } = string.Empty;
 }

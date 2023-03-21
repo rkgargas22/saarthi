@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
 using Tmf.Saarthi.Core.Enums;
 using Tmf.Saarthi.Core.Options;
+using Tmf.Saarthi.Core.RequestModels.Agent;
 using Tmf.Saarthi.Core.RequestModels.DMS;
 using Tmf.Saarthi.Core.RequestModels.Document;
 using Tmf.Saarthi.Core.RequestModels.Fleet;
 using Tmf.Saarthi.Core.RequestModels.FleetVehicle;
+using Tmf.Saarthi.Core.ResponseModels.Agent;
 using Tmf.Saarthi.Core.ResponseModels.Customer;
 using Tmf.Saarthi.Core.ResponseModels.DMS;
 using Tmf.Saarthi.Core.ResponseModels.Document;
@@ -712,5 +714,36 @@ public class FleetManager : IFleetManager
         }
 
         return getAdditionalInfoResponses;
+    }
+
+    public async Task<SendToDeviationAgentResponse> SendToDeviationAgent(SendToDeviationAgentRequest sendToDeviationAgentRequest, string StageCode)
+    {
+        SendToDeviationAgentResponse sendToDeviationAgentResponse = new SendToDeviationAgentResponse();
+
+        AddDeviationStageRequestModel addDeviationStageRequestModel = new AddDeviationStageRequestModel();
+        addDeviationStageRequestModel.FleetId = sendToDeviationAgentRequest.FleetID;
+        addDeviationStageRequestModel.StageCode = StageCode;
+        addDeviationStageRequestModel.VehicleIds = string.Join(",",sendToDeviationAgentRequest.VehicleIds);
+        addDeviationStageRequestModel.CreatedBy = 1;
+        addDeviationStageRequestModel.CreatedUserType = "AGENT";
+        addDeviationStageRequestModel.CreatedDate = DateTime.Now;
+
+        AddDeviationStageResponseModel addDeviationStageResponseModel = await _fleetRepository.SaveDeviationStageInFleet(addDeviationStageRequestModel);
+
+        if(addDeviationStageResponseModel != null && addDeviationStageResponseModel.FleetId != 0)
+        {
+            CommentRequest commentRequest = new CommentRequest();
+            commentRequest.FleetID = sendToDeviationAgentRequest.FleetID;
+            commentRequest.Comment = sendToDeviationAgentRequest.Comment;
+            commentRequest.Documents = sendToDeviationAgentRequest.Documents;
+
+            CommentResponse commentResponse = await AddComment(commentRequest);
+            if (commentResponse != null && commentResponse.CommentId != 0)
+            {
+                sendToDeviationAgentResponse.Message = "Updated Successfully";
+            }
+        }
+
+        return sendToDeviationAgentResponse;
     }
 }

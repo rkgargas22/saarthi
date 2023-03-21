@@ -1,4 +1,6 @@
-﻿using Tmf.Saarthi.Core.RequestModels.Fleet;
+﻿using Tmf.Saarthi.Core.RequestModels.Agent;
+using Tmf.Saarthi.Core.RequestModels.Fleet;
+using Tmf.Saarthi.Core.ResponseModels.Agent;
 using Tmf.Saarthi.Core.ResponseModels.Fleet;
 
 namespace Tmf.Saarthi.Manager.Interfaces;
@@ -34,4 +36,6 @@ public interface IFleetManager
     Task<List<GetDepartmentListResponse>> GetDepartmentList(GetDepartmentListRequest getDepartmentListRequest);
 
     Task<List<GetAdditionalInfoResponse>> GetAdditionalInfo(GetAdditionalInfoRequest getAdditionalInfoRequest);
+
+    Task<SendToDeviationAgentResponse> SendToDeviationAgent(SendToDeviationAgentRequest sendToDeviationAgentRequest, string StageCode);
 }

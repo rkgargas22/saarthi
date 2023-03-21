@@ -26,7 +26,7 @@ public class Data
     public string Document1 { get; set; } = string.Empty;
 
     [JsonPropertyName("doc_type")]
-    public int DocType { get; set; } = 0;
+    public string DocType { get; set; } 
 
     [JsonPropertyName("advanced_features")]
     public AdvancedFeatures AdvancedFeatures { get; set; }

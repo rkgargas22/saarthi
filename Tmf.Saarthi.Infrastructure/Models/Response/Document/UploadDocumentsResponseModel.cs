@@ -1,6 +1,13 @@
-﻿namespace Tmf.Saarthi.Infrastructure.Models.Response.Document;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-public class UploadDocumentsResponseModel
+namespace Tmf.Saarthi.Infrastructure.Models.Response.Document
 {
-    public long DocumentId { get; set; }
+    public class UploadDocumentsResponseModel
+    {
+        public long DocumentId { get; set; }
+    }
 }

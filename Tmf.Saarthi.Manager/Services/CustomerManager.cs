@@ -101,6 +101,9 @@ public class CustomerManager : ICustomerManager
         customerResponse.Status = customerResponseModel.Status;
         customerResponse.PanNo = customerResponseModel.PanNo;
         customerResponse.CustomerType = customerResponseModel.CustomerType;
+        customerResponse.StageId = customerResponseModel.StageId;
+        customerResponse.StageCode = customerResponseModel.StageCode;
+
         return customerResponse;
     }
 

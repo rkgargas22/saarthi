@@ -27,7 +27,7 @@ namespace Tmf.Saarthi.Infrastructure.Models.Request.Document
         public long CreatedBy { get; set; }
 
         [JsonPropertyName("createdDate")]
-        public DateTime CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
 
         [JsonPropertyName("createdUserType")]
         public string CreatedUserType { get; set; } = string.Empty;

@@ -4,7 +4,10 @@ using System.Data;
 using Tmf.Saarthi.Core.Options;
 using Tmf.Saarthi.Core.ResponseModels.Fleet;
 using Tmf.Saarthi.Infrastructure.Interfaces;
+using Tmf.Saarthi.Infrastructure.Models.Request;
 using Tmf.Saarthi.Infrastructure.Models.Request.Fleet;
+using Tmf.Saarthi.Infrastructure.Models.Request.FleetVehicle;
+using Tmf.Saarthi.Infrastructure.Models.Response.DMS;
 using Tmf.Saarthi.Infrastructure.Models.Response.Fleet;
 using Tmf.Saarthi.Infrastructure.SqlService;
 
@@ -518,5 +521,28 @@ public class FleetRepository : IFleetRepository
         }
 
         return getAdditionalInfoResponseModels;
+    }
+
+    public async Task<AddDeviationStageResponseModel> SaveDeviationStageInFleet(AddDeviationStageRequestModel addDeviationStageRequestModel)
+    {
+        List<SqlParameter> parameters = new List<SqlParameter>()
+        {
+            new SqlParameter("FleetId", addDeviationStageRequestModel.FleetId),
+            new SqlParameter("StageCode", addDeviationStageRequestModel.StageCode),
+            new SqlParameter("VehicleIds", addDeviationStageRequestModel.VehicleIds),
+            new SqlParameter("CreatedBy", addDeviationStageRequestModel.CreatedBy),
+            new SqlParameter("CreatedUserType", addDeviationStageRequestModel.CreatedUserType),
+            new SqlParameter("CreatedDate", addDeviationStageRequestModel.CreatedDate)
+        };
+
+        DataTable dt = await _sqlUtility.ExecuteCommandAsync(_connectionStringsOptions.DefaultConnection, "uspSaveDeviationStageVehicle", parameters);
+
+        AddDeviationStageResponseModel addDeviationStageResponseModel = new AddDeviationStageResponseModel();
+        if (dt.Rows.Count > 0)
+        {
+            addDeviationStageResponseModel.FleetId = (long)dt.Rows[0]["FleetId"];
+        }
+
+        return addDeviationStageResponseModel;
     }
 }

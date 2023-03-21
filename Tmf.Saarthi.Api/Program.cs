@@ -4,6 +4,7 @@ using System.Text;
 using Tmf.Logs;
 using Tmf.Saarthi.Api.Validators.Agent;
 using Tmf.Saarthi.Api.Validators.Customer;
+using Tmf.Saarthi.Api.Validators.DMS;
 using Tmf.Saarthi.Api.Validators.Document;
 using Tmf.Saarthi.Api.Validators.Email;
 using Tmf.Saarthi.Api.Validators.Fleet;
@@ -12,6 +13,7 @@ using Tmf.Saarthi.Api.Validators.Ocr;
 using Tmf.Saarthi.Api.Validators.Payment;
 using Tmf.Saarthi.Core.RequestModels.Agent;
 using Tmf.Saarthi.Core.RequestModels.Customer;
+using Tmf.Saarthi.Core.RequestModels.DMS;
 using Tmf.Saarthi.Core.RequestModels.Document;
 using Tmf.Saarthi.Core.RequestModels.Email;
 using Tmf.Saarthi.Core.RequestModels.Fleet;
@@ -19,6 +21,8 @@ using Tmf.Saarthi.Core.RequestModels.Login;
 using Tmf.Saarthi.Core.RequestModels.Natch;
 using Tmf.Saarthi.Core.RequestModels.Ocr;
 using Tmf.Saarthi.Core.RequestModels.Payment;
+using Tmf.Saarthi.Manager.Interfaces;
+
 namespace Tmf.Saarthi.Api;
 
 public class Program
@@ -35,6 +39,7 @@ public class Program
         builder.Services.AddCors();
         #region Options        
         builder.Services.Configure<OtpServiceOptions>(builder.Configuration.GetSection(OtpServiceOptions.OtpService));
+        builder.Services.Configure<HunterOptions>(builder.Configuration.GetSection(HunterOptions.Hunter));
         builder.Services.Configure<LoginOptions>(builder.Configuration.GetSection(LoginOptions.Login));
         builder.Services.Configure<ConnectionStringsOptions>(builder.Configuration.GetSection(ConnectionStringsOptions.ConnectionStrings));
         builder.Services.Configure<InstaVeritaOptions>(builder.Configuration.GetSection(InstaVeritaOptions.InstaVerita));
@@ -132,6 +137,7 @@ public class Program
         builder.Services.AddScoped<IDocumentTypeMstrManager, DocumentTypeMstrManager>();
         builder.Services.AddScoped<IStageMasterManager, StageMasterManager>();
         builder.Services.AddScoped<IFIManager, FIManager>();
+        builder.Services.AddScoped<IHunterManager, HunterManager>();
         #endregion
 
         #region Repository
@@ -161,6 +167,7 @@ public class Program
         builder.Services.AddScoped<IDocumentTypeMstrRepository, DocumentTypeMstrRepository>();
         builder.Services.AddScoped<IStageMasterRepository, StageMasterRepository>();
         builder.Services.AddScoped<IFIRepository, FIRepository>();
+        builder.Services.AddScoped<IHunterRepository, HunterRepository>();
         #endregion
 
         #region Validators
@@ -191,6 +198,8 @@ public class Program
         builder.Services.AddScoped<IValidator<AgentListDataRequest>, AgentListDataValidator>();
         builder.Services.AddScoped<IValidator<SendAgentEmailRequest>, SendAgentEmailValidator>();
         builder.Services.AddScoped<IValidator<SendOtpToCustomerRequest>, SendOtpToCustomerValidator>();
+        builder.Services.AddScoped<IValidator<UploadDocumentsDMSRequest>, UploadDocumentsDMSRequestValidator>();
+        builder.Services.AddScoped<IValidator<ViewDocumentRequest>, ViewDocumentRequestValidator>();
         #endregion
         var tokenOptions = builder.Configuration.GetSection("Auth").Get<TokenOptions>();
         builder.Services.AddSingleton<ILog, Log>();

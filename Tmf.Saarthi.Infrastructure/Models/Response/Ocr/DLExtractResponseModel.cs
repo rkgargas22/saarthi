@@ -59,7 +59,7 @@ public class ExtractionOutputDL
     public string IdNumber { get; set; } = string.Empty;
 
     [JsonPropertyName("is_scanned")]
-    public string IsScanned { get; set; } = string.Empty;
+    public bool? IsScanned { get; set; }
 
     [JsonPropertyName("issue_dates")]
     public IssueDates IssueDates { get; set; }

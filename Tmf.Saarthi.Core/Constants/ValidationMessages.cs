@@ -78,6 +78,7 @@ public class ValidationMessages
     public const string DocumentUpload = "Upload Valid Document.";
     public const string StageType = "Enter Valid Stage Type.";
     public const string ExtensionType = "Enter Valid Extention.";
+    public const string IsRCUUpload = "Enter Valid RCUUpload Flag.";
 
     #endregion
 
