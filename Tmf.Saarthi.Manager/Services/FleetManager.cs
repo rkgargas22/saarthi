@@ -701,16 +701,16 @@ public class FleetManager : IFleetManager
 
         foreach(var addInfo in getAdditionalInfoResponseModels)
         {
-            GetAdditionalInfoResponseModel getAdditionalInfoResponseModel = new GetAdditionalInfoResponseModel();
-            getAdditionalInfoResponseModel.AdditionalInfoId = addInfo.AdditionalInfoId;
-            getAdditionalInfoResponseModel.Comment = addInfo.Comment;
-            getAdditionalInfoResponseModel.RoleName = addInfo.RoleName;
-            getAdditionalInfoResponseModel.DepartmentCode = addInfo.DepartmentCode;
-            getAdditionalInfoResponseModel.StageCode = addInfo.StageCode;
-            getAdditionalInfoResponseModel.FleetID = addInfo.FleetID;
-            getAdditionalInfoResponseModel.AssignedTo = addInfo.AssignedTo;
+            GetAdditionalInfoResponse getAdditionalInfoResponse = new GetAdditionalInfoResponse();
+            getAdditionalInfoResponse.AdditionalInfoId = addInfo.AdditionalInfoId;
+            getAdditionalInfoResponse.Comment = addInfo.Comment;
+            getAdditionalInfoResponse.RoleName = addInfo.RoleName;
+            getAdditionalInfoResponse.DepartmentCode = addInfo.DepartmentCode;
+            getAdditionalInfoResponse.StageCode = addInfo.StageCode;
+            getAdditionalInfoResponse.FleetID = addInfo.FleetID;
+            getAdditionalInfoResponse.AssignedTo = addInfo.AssignedTo;
 
-            getAdditionalInfoResponseModels.Add(getAdditionalInfoResponseModel);
+            getAdditionalInfoResponses.Add(getAdditionalInfoResponse);
         }
 
         return getAdditionalInfoResponses;
