@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\Response\Ecom\" />
     <Folder Include="SqlService\" />
    
   </ItemGroup>

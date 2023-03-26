@@ -37,7 +37,8 @@ public class Program
 
         builder.Services.AddHttpClient();
         builder.Services.AddCors();
-        #region Options        
+        #region Options  
+        builder.Services.Configure<EcomOptions>(builder.Configuration.GetSection(EcomOptions.Ecom));
         builder.Services.Configure<OtpServiceOptions>(builder.Configuration.GetSection(OtpServiceOptions.OtpService));
         builder.Services.Configure<HunterOptions>(builder.Configuration.GetSection(HunterOptions.Hunter));
         builder.Services.Configure<LoginOptions>(builder.Configuration.GetSection(LoginOptions.Login));
@@ -138,6 +139,7 @@ public class Program
         builder.Services.AddScoped<IStageMasterManager, StageMasterManager>();
         builder.Services.AddScoped<IFIManager, FIManager>();
         builder.Services.AddScoped<IHunterManager, HunterManager>();
+        builder.Services.AddScoped<IEcomManager, EcomManager>();
         #endregion
 
         #region Repository
@@ -168,6 +170,7 @@ public class Program
         builder.Services.AddScoped<IStageMasterRepository, StageMasterRepository>();
         builder.Services.AddScoped<IFIRepository, FIRepository>();
         builder.Services.AddScoped<IHunterRepository, HunterRepository>();
+        builder.Services.AddScoped<IEcomRepository, EcomRepository>();
         #endregion
 
         #region Validators
